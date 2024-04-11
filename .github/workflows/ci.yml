@@ -16,7 +16,7 @@ jobs:
 
       - name: Install webrpc-gen
         run: |
-          curl -o ./webrpc-gen -fLJO https://github.com/webrpc/webrpc/releases/download/v0.14.0/webrpc-gen.linux-amd64
+          curl -o ./webrpc-gen -fLJO https://github.com/webrpc/webrpc/releases/download/v0.17.2/webrpc-gen.linux-amd64
           chmod +x ./webrpc-gen
           echo $PWD >> $GITHUB_PATH
 
@@ -29,25 +29,26 @@ jobs:
   webrpc-tests:
     strategy:
       matrix:
-        webrpc-version: [v0.14.0]
+        webrpc-version: [v0.17.2]
+        
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
+
       - name: Set up webrpc binary cache folder
         uses: actions/cache@v3
         with:
           key: webrpc-binaries
           path: tests/bin
+
       - name: Install dependencies
-        run: cd tests && npm install
+        run: cd tests
+
       - name: Download webrpc binaries
         run: cd tests && ./scripts/download.sh ${{ matrix.webrpc-version }} bin/${{ matrix.webrpc-version }}
+
       - name: Export path of webrpc binaries
         run: cd tests && echo "$PWD/bin/${{ matrix.webrpc-version }}" >> $GITHUB_PATH
+
       - name: Run interoperability tests
         run: cd tests && ./scripts/test.sh
-      - name: Run typescript check
-        run: cd tests && npm run ts-check

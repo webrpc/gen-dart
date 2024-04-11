@@ -1,16 +1,39 @@
 #!/bin/bash
 set -e
 
-export PORT=9988
+Help()
+{
+   # Display Help
+   echo "Generates the test client and server Dart code and runs tests against it."
+   echo
+   echo "Syntax: test.sh [-r|h]"
+   echo "options:"
+   echo "h prints this help message"
+   echo "r path/to/webrpc/bin if using a local version of the base webrpc repo"
+   echo
+}
 
 tmp=".tmp"
-schema="$tmp/test.ridl"
-webrpcgen="$tmp/webrpc-gen"
-webrpctest="$tmp/webrpc-test"
 
-# for testing against a local version of webrpc. Update your path
-# webrpcgen="../../webrpc/bin/webrpc-gen"
-# webrpctest="../../webrpc/bin/webrpc-test"
+webrpc_root=$tmp
+while getopts ":hr:" option; do
+   case $option in
+      h) # display Help
+         Help
+         exit;;
+      r) # Enter a name
+         webrpc_root=$OPTARG;;
+     \?) # Invalid option
+         echo "Error: Invalid option"
+         exit;;
+   esac
+done
+
+export PORT=9988
+
+schema="$tmp/test.ridl"
+webrpcgen="$webrpc_root/webrpc-gen"
+webrpctest="$webrpc_root/webrpc-test"
 
 ./$webrpctest -version
 ./$webrpctest -print-schema > $schema
