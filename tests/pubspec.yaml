@@ -1,14 +1,11 @@
 name: tests
-description: A starting point for Dart libraries or applications.
-version: 1.0.0
-# repository: https://github.com/my_org/my_repo
+description: Tests for the Webrpc Dart generator
+version: 0.17.2
 
 environment:
   sdk: ^3.3.3
 
-# Add regular dependencies here.
 dependencies:
-  # path: ^1.8.0
 
 dev_dependencies:
   lints: ^3.0.0
