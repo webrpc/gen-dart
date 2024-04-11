@@ -1,0 +1,81 @@
+{{define "client"}}
+
+{{- $typeMap := .TypeMap -}}
+{{- $opts := .Opts -}}
+
+{{- if .Services}}
+
+{{- range .Services}}
+class {{.Name}}Impl implements {{.Name}} {
+    {{.Name}}Impl(String hostname) : _baseUrl = '$hostname/rpc/{{.Name}}/';
+
+    final String _baseUrl;
+    final HttpClient _httpClient = HttpClient();
+
+    {{- range $_, $method := .Methods}}
+
+    @override
+    Future<{{template "methodOutputs" dict "Method" . "TypeMap" $typeMap}}> {{firstLetterToLower .Name}}({{template "methodInputs" dict "Method" . "TypeMap" $typeMap}}) async {
+        HttpClientRequest request = await _httpClient.postUrl(_makeUri('{{.Name}}'));
+        {{- if gt (len .Inputs) 0}}
+        final String body = jsonEncode({
+        {{if true}}{{end}}
+        {{- range $i, $input := .Inputs -}}
+        {{if true}}    {{end}}'{{$input.Name}}': {{$input.Name}},
+        {{end -}}
+        });
+        _addHeaders(request, body.length);
+        request.add(utf8.encode(body));
+        {{else}}
+        _addHeaders(request, 0);
+        {{end -}}
+        {{if eq (len $method.Outputs) 0 -}}
+        await _handleResponse(request);
+        {{- else -}}
+        final HttpClientResponse response = await _handleResponse(request);
+        final String result = await utf8.decodeStream(response);
+        final Map<String, dynamic> json = jsonDecode(result);
+        return (
+        {{if true}}{{end}}
+        {{- range $i, $output := .Outputs -}}
+        {{if true}}    {{end}}{{$output.Name}}: {{template "type" dict "Type" $output.Type "TypeMap" $typeMap}}.fromJson(json['{{$output.Name}}']),
+        {{end -}}
+        );
+        {{- end}}
+    }
+    {{- end}}
+
+    Uri _makeUri(String name) {
+        return Uri.parse(_baseUrl + name);
+    }
+
+    void _addHeaders(HttpClientRequest request, int contentLength) {
+        request.headers.set('Content-Length', contentLength);
+        request.headers.set('Content-Type', 'application/json');
+        request.headers.set('Accept', 'application/json');
+    }
+
+    Future<HttpClientResponse> _handleResponse(HttpClientRequest request) async {
+        final HttpClientResponse response = await request.close();
+        if (response.statusCode >= 400) {
+            try {
+                final String body = await utf8.decodeStream(response);
+                final Map<String, dynamic> json = jsonDecode(body);
+                final int webrpcErrorCode = json['code'];
+                if (response.statusCode >= 500) {
+                    throw WebrpcException.fromCode(webrpcErrorCode);
+
+                } else {
+                    throw WebrpcError.fromCode(webrpcErrorCode);
+                }
+            } on ArgumentError catch (_) {
+                // https://github.com/webrpc/webrpc/blob/master/gen/errors.go
+                throw WebrpcException.fromCode(-5);
+            }
+        }
+        return response;
+    }
+}
+{{- end -}}
+{{- end -}}
+{{- end -}}

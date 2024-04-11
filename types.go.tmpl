@@ -1,0 +1,102 @@
+{{define "types"}}
+
+{{- $typeMap := .TypeMap -}}
+{{- $types := .Types -}}
+{{- $services := .Services -}}
+
+{{if $types -}}
+{{range $_i, $type := $types -}}
+
+{{if isEnumType $type }}
+enum {{$type.Name}} {
+    {{- range $i, $field := $type.Fields}}
+    {{- if $i}},{{end}}
+    {{$field.Name}}
+    {{- end}};
+
+    factory {{.Name}}.fromJson(dynamic json) {
+        switch (json) {
+            {{- range $i, $field := $type.Fields}}
+            case '{{$field.Name}}':
+                return {{$type.Name}}.{{$field.Name}};
+            {{- end}}
+            default:
+                throw ArgumentError.value(json);
+        }
+    }
+
+    String toJson() {
+        return name;
+    }
+}
+{{end -}}
+
+{{- if isStructType $type }}
+class {{$type.Name}} {
+    {{$type.Name}}({
+        {{- range $i, $field := $type.Fields}}
+        {{- if $i}},{{end}}
+        required this.{{template "fieldName" dict "Field" .}}
+        {{- end}}
+    });
+    {{range $_, $field := $type.Fields}}
+    {{- $isExportable := true -}}
+    {{- range $meta := $field.Meta -}}
+        {{- if exists $meta "json" -}}
+            {{- if eq (printf "%v" (get $meta "json")) "-" -}}
+                {{- $isExportable = false}}
+            {{- end -}}
+        {{- end -}}
+    {{- end }}
+    {{- if $isExportable }}
+    final {{template "type" dict "Type" $field.Type "TypeMap" $typeMap}}{{if .Optional}}?{{end}} {{template "fieldName" dict "Field" .}};
+    {{- end -}}
+    {{- end}}
+  
+    {{.Name}}.fromJson(Map<String, dynamic> json)
+        : {{range $i, $field := $type.Fields}}
+          {{- template "fieldName" dict "Field" .}} = _{{.Name}}(json['{{template "fieldName" dict "Field" .}}'])
+          {{- if lt $i (lastIndex $type.Fields)}},{{else}};{{end}}
+          {{end -}}
+  
+    {{range $i, $field := $type.Fields}}
+    static {{template "type" dict "Type" $field.Type "TypeMap" $typeMap}}{{if .Optional}}?{{end}} _{{.Name}}(dynamic v0) {
+        {{- template "fromJson" dict "Type" $field.Type "TypeMap" $typeMap}}
+        return r0;
+    }
+    {{end -}}
+  
+    {{if true}}{{end}}
+    Map<String, dynamic> toJson() {
+        return {
+            {{- range $i, $field := $type.Fields}}
+            '{{- template "fieldName" dict "Field" .}}': {{template "fieldName" dict "Field" .}},
+            {{- end}}
+        };
+    }
+}
+{{end -}}
+{{end -}}
+{{end}}
+
+T _cast<T>(x) {
+  if (x is T) {
+    return x;
+  } else {
+    throw ArgumentError.value(x);
+  }
+}
+
+{{if $services}}
+{{- range $_, $service := $services}}
+abstract interface class {{$service.Name}} {
+{{- range $_, $method := $service.Methods}}
+    Future<{{template "methodOutputs" dict "Method" . "TypeMap" $typeMap}}> {{firstLetterToLower .Name}}({{template "methodInputs" dict "Method" . "TypeMap" $typeMap}});
+{{- end}}
+}
+{{- end}}
+{{end -}}
+
+
+
+{{end}}

@@ -1,0 +1,31 @@
+{{define "fromJson"}}
+{{- /* Recursively builds objects from dynamic json */ -}}
+
+{{- $type := .Type}}
+{{- $typeMap := .TypeMap}}
+{{- $depth := (or .Depth 0)}}
+{{- $ind := (indent (add $depth 2) 4)}}
+
+{{- if isMapType $type}}
+{{$ind}}final {{template "type" dict "Type" $type "TypeMap" $typeMap}} r{{$depth}} = {};
+{{$ind}}for (MapEntry e{{$depth}} in v{{$depth}}.entries) {
+{{$ind}}    final dynamic v{{add $depth 1}} = e{{$depth}}.value;
+{{$ind}}    {{- template "fromJson" dict "Type" (mapValueType $type) "TypeMap" $typeMap "Depth" (add $depth 1)}}
+{{$ind}}    r{{$depth}}[_cast<{{template "type" dict "Type" (mapKeyType $type) "TypeMap" $typeMap}}>(e{{$depth}}.key)] = r{{add $depth 1}};
+{{$ind}}}
+
+{{- else if isListType $type}}
+{{$ind}}final {{template "type" dict "Type" $type "TypeMap" $typeMap}} r{{$depth}} = [];
+{{$ind}}for (dynamic v{{add $depth 1}} in v{{$depth}}) {
+{{$ind}}    {{- template "fromJson" dict "Type" (listElemType $type) "TypeMap" $typeMap "Depth" (add $depth 1)}}
+{{$ind}}    r{{$depth}}.add(r{{add $depth 1}});
+{{$ind}}}
+
+{{- else if isCoreType $type}}
+{{$ind}}final {{get $typeMap $type}} r{{$depth}} = _cast<{{get $typeMap $type}}>(v{{$depth}});
+
+{{- else}}
+{{$ind}}final {{$type}} r{{$depth}} = {{$type}}.fromJson(v{{$depth}});
+
+{{- end -}}
+{{- end -}}
