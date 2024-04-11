@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:test/test.dart';
-import '../.tmp/client.dart';
+import 'package:tests/client.dart';
 
 void main() {
   group('Test interoperability with webrpc-test reference server', () {
@@ -10,11 +10,15 @@ void main() {
 
     test('serialization', () {
       expect(Complex.fromJson(jsonDecode(jsonEncode(_complex))), isNotNull);
-      // TODO future version where we implement deep equality by overriding == and hashCode
-      // expect(Complex.fromJson(jsonDecode(jsonEncode(complex))), equals(complex));
       expect(Simple.fromJson(jsonDecode(jsonEncode(_simple))), isNotNull);
       expect(User.fromJson(jsonDecode(jsonEncode(_user))), isNotNull);
       expect(Status.fromJson(jsonDecode(jsonEncode(_status))), isNotNull);
+
+      // TODO future version where we implement deep equality by overriding == and hashCode
+      // expect(Complex.fromJson(jsonDecode(jsonEncode(_complex))), equals(_complex));
+      // expect(Simple.fromJson(jsonDecode(jsonEncode(_simple))), equals(_simple));
+      // expect(User.fromJson(jsonDecode(jsonEncode(_user))), equals(_user));
+      // expect(Status.fromJson(jsonDecode(jsonEncode(_status))), equals(_status));
     });
 
     test('GetEmpty - doesnt throw', () async {

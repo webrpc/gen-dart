@@ -42,6 +42,8 @@ Change any of the following values by passing `-option="Value"` CLI flag to `web
 | `-server`            | generate server code       | unset (`false`)            |
 
 ## CONTRIBUTE
+
+### Setup
 Install Dart or Flutter. Ensure your version matches the `sdk` version specified in [tests/pubspec.yaml](tests/pubspec.yaml).
 
 Fork this repo.
@@ -52,6 +54,17 @@ cd tests
 ./scripts/download.sh v0.17.2 .tmp/
 ./scripts/test.sh
 ```
+
+Generated code will be written to [tests/lib/client.dart](tests/lib/client.dart)
+
+### Make changes
+Refer to the [webrpc generator README](https://github.com/webrpc/webrpc/tree/master/gen) for help on syntax.
+In brief, start in [main.go.tmpl] and traverse the template tree by going to the template file
+named by `{{template "templateName" <args>}}`, e.g. "templateName.go.tmpl". 
+
+### (Update and) Run tests
+Following the typical structure for a Dart package, tests are located in the aptly named
+[tests/test/test_test.dart](tests/test/tests_test.dart).
 
 ### Working with a local version of webrpc?
 If you are working with a local version of the base `webrpc` repo, build the generator and test server scripts

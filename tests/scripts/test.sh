@@ -37,7 +37,7 @@ webrpctest="$webrpc_root/webrpc-test"
 
 ./$webrpctest -version
 ./$webrpctest -print-schema > $schema
-./$webrpcgen -schema=$schema -target=../ -client -out=$tmp/client.dart
+./$webrpcgen -schema=$schema -target=../ -client -out=lib/client.dart
 
 ./$webrpctest -server -port=$PORT -timeout=5s &
 
