@@ -4,7 +4,7 @@
 {{- $type := .Type -}}
 {{- $collectionType := or .CollectionType ""}}
 
-{{- $disallowedTypes := array "null" "any" -}}
+{{- $disallowedTypes := array "null" -}}
 
 {{- if isMapType $type -}}
     {{- template "validateType" dict "Id" $id "Type" (mapKeyType $type) "CollectionType" "map key" -}}
@@ -25,6 +25,10 @@
         {{- range $_, $field := $type.Fields -}}
             {{- template "validateType" dict "Id" (printf "%s.%s" $id $field.Name) "Type" $field.Type -}}
         {{- end -}}
+
+    {{- else -}}
+        {{- stderrPrintf "'%s' struct type %s without fields\n" $id $type -}}
+        {{- exit 1 -}}
     {{- end -}}
 
 {{- end -}}

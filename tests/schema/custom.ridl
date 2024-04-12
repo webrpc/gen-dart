@@ -22,7 +22,7 @@ struct CoreTypesOptional
     - mByte?: byte
     - mBool?: bool
     # not allowed
-    - mNull?: null
+    # - mNull?: null
     - mAny?: any
     - mUint8?: uint8
     - mUint16?: uint16
