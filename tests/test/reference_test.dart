@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:test/test.dart';
-import 'package:tests/client.dart';
+import 'package:tests/ref_client.dart';
 
 void main() {
   group('Test interoperability with webrpc-test reference server', () {

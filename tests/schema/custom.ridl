@@ -1,0 +1,28 @@
+webrpc = v1
+
+name = flutter-go
+version = v1.0.0
+
+enum ItemTier: uint32
+    - REGULAR
+    - PREMIUM
+
+struct Item
+    - id: string
+    - name: string
+    - tier: ItemTier
+    - count: uint32
+    - createdAt?: timestamp
+
+struct ItemSummary
+    - id: string
+    - name: string
+
+service CustomService
+  - Ping()
+  - GetItems() => (items: []ItemSummary)
+  - GetItem(itemId: string) => (item: Item)
+  - CreateItem(item: Item)
+  - PutOne(itemId: string)
+  - TakeOne(itemId: string)
+  - DeleteItem(itemId: string)

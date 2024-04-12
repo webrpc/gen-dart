@@ -31,13 +31,15 @@ done
 
 export PORT=9988
 
-schema="$tmp/test.ridl"
+ref_schema="$tmp/test.ridl"
 webrpcgen="$webrpc_root/webrpc-gen"
 webrpctest="$webrpc_root/webrpc-test"
 
 ./$webrpctest -version
-./$webrpctest -print-schema > $schema
-./$webrpcgen -schema=$schema -target=../ -client -out=lib/client.dart
+./$webrpctest -print-schema > $ref_schema
+./$webrpcgen -schema=$ref_schema -target=../ -client -out=lib/ref_client.dart
+
+./$webrpcgen -schema="schema/custom.ridl" -target=../ -client -out=lib/custom_client.dart
 
 ./$webrpctest -server -port=$PORT -timeout=5s &
 

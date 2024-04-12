@@ -4,25 +4,31 @@
 {{- $type := .Type}}
 {{- $typeMap := .TypeMap}}
 {{- $depth := (or .Depth 0)}}
-{{- $ind := (indent (add $depth 2) 4)}}
+{{- $optional := (or .Optional false)}}
+{{- $nIndents := (int (add $depth 2))}}
+{{- $ind := (repeat $nIndents "    ")}}
 
 {{- if isMapType $type}}
 {{$ind}}final {{template "type" dict "Type" $type "TypeMap" $typeMap}} r{{$depth}} = {};
 {{$ind}}for (MapEntry e{{$depth}} in v{{$depth}}.entries) {
 {{$ind}}    final dynamic v{{add $depth 1}} = e{{$depth}}.value;
-{{$ind}}    {{- template "fromJson" dict "Type" (mapValueType $type) "TypeMap" $typeMap "Depth" (add $depth 1)}}
+{{$ind}}    {{- template "fromJson" dict "Type" (mapValueType $type) "TypeMap" $typeMap "Depth" (add $depth 1) "Optional" .Optional}}
 {{$ind}}    r{{$depth}}[_cast<{{template "type" dict "Type" (mapKeyType $type) "TypeMap" $typeMap}}>(e{{$depth}}.key)] = r{{add $depth 1}};
 {{$ind}}}
 
 {{- else if isListType $type}}
 {{$ind}}final {{template "type" dict "Type" $type "TypeMap" $typeMap}} r{{$depth}} = [];
 {{$ind}}for (dynamic v{{add $depth 1}} in v{{$depth}}) {
-{{$ind}}    {{- template "fromJson" dict "Type" (listElemType $type) "TypeMap" $typeMap "Depth" (add $depth 1)}}
+{{$ind}}    {{- template "fromJson" dict "Type" (listElemType $type) "TypeMap" $typeMap "Depth" (add $depth 1) "Optional" .Optional}}
 {{$ind}}    r{{$depth}}.add(r{{add $depth 1}});
 {{$ind}}}
 
 {{- else if isCoreType $type}}
-{{$ind}}final {{get $typeMap $type}} r{{$depth}} = _cast<{{get $typeMap $type}}>(v{{$depth}});
+{{- if (eq (get $typeMap $type) "DateTime")}}
+{{$ind}}final r{{$depth}} = {{ternary .Optional "_dateTimeFromJsonOptional" "_dateTimeFromJson"}}(v{{$depth}});
+{{- else}}
+{{$ind}}final {{get $typeMap $type}}{{if $optional}}?{{end}} r{{$depth}} = _cast<{{get $typeMap $type}}{{if $optional}}?{{end}}>(v{{$depth}});
+{{- end}}
 
 {{- else}}
 {{$ind}}final {{$type}} r{{$depth}} = {{$type}}.fromJson(v{{$depth}});

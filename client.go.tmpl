@@ -21,7 +21,7 @@ class {{.Name}}Impl implements {{.Name}} {
         final String body = jsonEncode({
         {{if true}}{{end}}
         {{- range $i, $input := .Inputs -}}
-        {{if true}}    {{end}}'{{$input.Name}}': {{$input.Name}},
+        {{indent 4 ""}}'{{$input.Name}}': {{$input.Name}},
         {{end -}}
         });
         _addHeaders(request, body.length);
@@ -38,11 +38,19 @@ class {{.Name}}Impl implements {{.Name}} {
         return (
         {{if true}}{{end}}
         {{- range $i, $output := .Outputs -}}
-        {{if true}}    {{end}}{{$output.Name}}: {{template "type" dict "Type" $output.Type "TypeMap" $typeMap}}.fromJson(json['{{$output.Name}}']),
+        {{if true}}    {{end}}{{$output.Name}}: _{{firstLetterToLower $method.Name}}{{firstLetterToUpper .Name}}(json['{{$output.Name}}']),
         {{end -}}
         );
         {{- end}}
     }
+
+    {{- range $i, $output := .Outputs}}
+    {{if true}}{{end}}
+    static {{template "type" dict "Type" $output.Type "TypeMap" $typeMap}}{{if .Optional}}?{{end}} _{{firstLetterToLower $method.Name}}{{firstLetterToUpper .Name}}(dynamic v0) {
+        {{- template "fromJson" dict "Type" $output.Type "TypeMap" $typeMap "Optional" .Optional}}
+        return r0;
+    }
+    {{- end}}
     {{- end}}
 
     Uri _makeUri(String name) {

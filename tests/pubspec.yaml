@@ -3,7 +3,7 @@ description: Tests for the Webrpc Dart generator
 version: 0.17.2
 
 environment:
-  sdk: ^3.3.3
+  sdk: ^3.1.1
 
 dependencies:
 

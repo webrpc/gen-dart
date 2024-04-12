@@ -61,7 +61,7 @@ class {{$type.Name}} {
   
     {{range $i, $field := $type.Fields}}
     static {{template "type" dict "Type" $field.Type "TypeMap" $typeMap}}{{if .Optional}}?{{end}} _{{.Name}}(dynamic v0) {
-        {{- template "fromJson" dict "Type" $field.Type "TypeMap" $typeMap}}
+        {{- template "fromJson" dict "Type" $field.Type "TypeMap" $typeMap "Optional" .Optional}}
         return r0;
     }
     {{end -}}
@@ -70,7 +70,11 @@ class {{$type.Name}} {
     Map<String, dynamic> toJson() {
         return {
             {{- range $i, $field := $type.Fields}}
+            {{- if (eq (toString $field.Type) "timestamp")}}
+            '{{- template "fieldName" dict "Field" .}}': {{ternary .Optional "_dateTimeToJsonOptional" "_dateTimeToJson"}}({{template "fieldName" dict "Field" .}}),
+            {{- else}}
             '{{- template "fieldName" dict "Field" .}}': {{template "fieldName" dict "Field" .}},
+            {{- end}}
             {{- end}}
         };
     }
@@ -80,11 +84,34 @@ class {{$type.Name}} {
 {{end}}
 
 T _cast<T>(x) {
-  if (x is T) {
-    return x;
+    if ((x == null) && (null is T)) {
+        return x;
+    } else if (x is T) {
+        return x;
+    } else {
+        throw ArgumentError.value(x);
+    }
+}
+
+DateTime? _dateTimeFromJsonOptional(dynamic v0) {
+  if (v0 == null) return null;
+  return _dateTimeFromJson(v0);
+}
+
+DateTime _dateTimeFromJson(dynamic v0) {
+  if ((v0 != null) && (v0 is String)) {
+    return DateTime.parse(v0);
   } else {
-    throw ArgumentError.value(x);
+    throw ArgumentError.value(v0, "v0", "Cannot parse $v0 to DateTime");
   }
+}
+
+String? _dateTimeToJsonOptional(DateTime? timestamp) {
+    return timestamp?.toIso8601String();
+}
+
+String _dateTimeToJson(DateTime timestamp) {
+    return timestamp.toIso8601String();
 }
 
 {{if $services}}

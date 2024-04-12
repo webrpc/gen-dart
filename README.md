@@ -64,7 +64,7 @@ named by `{{template "templateName" <args>}}`, e.g. "templateName.go.tmpl".
 
 ### (Update and) Run tests
 Following the typical structure for a Dart package, tests are located in the aptly named
-[tests/test/test_test.dart](tests/test/tests_test.dart).
+[tests/test/](tests/test/).
 
 ### Working with a local version of webrpc?
 If you are working with a local version of the base `webrpc` repo, build the generator and test server scripts
