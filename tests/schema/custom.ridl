@@ -18,6 +18,44 @@ struct ItemSummary
     - id: string
     - name: string
 
+struct CoreTypesOptional
+    - mByte?: byte
+    - mBool?: bool
+    # not allowed
+    - mNull?: null
+    - mAny?: any
+    - mUint8?: uint8
+    - mUint16?: uint16
+    - mUint32?: uint32
+    - mUint64?: uint64
+    - mInt8?: int8
+    - mInt16?: int16
+    - mInt32?: int32
+    - mInt64?: int64
+    - mFloat32?: float32
+    - mFloat64?: float64
+    - mString?: string
+    - mTimestamp?: timestamp
+
+struct CoreTypesRequired
+    - mByte: byte
+    - mBool: bool
+    - mAny: any
+    # not allowed
+    # - mNull: null
+    - mUint8: uint8
+    - mUint16: uint16
+    - mUint32: uint32
+    - mUint64: uint64
+    - mInt8: int8
+    - mInt16: int16
+    - mInt32: int32
+    - mInt64: int64
+    - mFloat32: float32
+    - mFloat64: float64
+    - mString: string
+    - mTimestamp: timestamp
+
 service CustomService
   - Ping()
   - GetItems() => (items: []ItemSummary)
@@ -26,3 +64,4 @@ service CustomService
   - PutOne(itemId: string)
   - TakeOne(itemId: string)
   - DeleteItem(itemId: string)
+  - Bingo(t: CoreTypesRequired)

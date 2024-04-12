@@ -1,0 +1,32 @@
+{{- define "validateType" -}}
+
+{{- $id := .Id -}}
+{{- $type := .Type -}}
+{{- $collectionType := or .CollectionType ""}}
+
+{{- $disallowedTypes := array "null" "any" -}}
+
+{{- if isMapType $type -}}
+    {{- template "validateType" dict "Id" $id "Type" (mapKeyType $type) "CollectionType" "map key" -}}
+    {{- template "validateType" dict "Id" $id "Type" (mapValueType $type) "CollectionType" "map value" -}}
+
+{{- else if isListType $type -}}
+    {{- template "validateType" dict "Id" (printf "%s[element]" $id) "Type" (listElemType $type) "CollectionType" "list element" -}}
+
+{{- else if isCoreType $type -}}
+    {{- if (has $type $disallowedTypes)}}
+        {{- stderrPrintf "Generator error: '%s' with %s type '%s' not supported for Dart generation. Consider using a more well-defined type. \n" $id $collectionType $type -}}
+        {{- exit 1 -}}
+    {{- end -}}
+
+{{- else if isStructType $type -}}
+    {{/*TODO Investigate: I dont know which struct types dont have fields but this check prevents throws. */}}
+    {{- if hasField $type "Fields" -}}
+        {{- range $_, $field := $type.Fields -}}
+            {{- template "validateType" dict "Id" (printf "%s.%s" $id $field.Name) "Type" $field.Type -}}
+        {{- end -}}
+    {{- end -}}
+
+{{- end -}}
+
+{{- end -}}

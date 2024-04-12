@@ -20,16 +20,6 @@
   {{- end -}}
 {{- end -}}
 
-{{- if ne .WebrpcVersion "v1" -}}
-  {{- stderrPrintf "%s generator error: unsupported webrpc version %s\n" .WebrpcTarget .WebrpcVersion -}}
-  {{- exit 1 -}}
-{{- end -}}
-
-{{- if not (minVersion .WebrpcGenVersion "v0.17.2") -}}
-  {{- stderrPrintf "%s generator error: unsupported webrpc-gen version %s, please update\n" .WebrpcTarget .WebrpcGenVersion -}}
-  {{- exit 1 -}}
-{{- end -}}
-
 {{- set $opts "" false -}}
 {{- range $_, $service := .Services -}}
   {{- range $_, $method := $service.Methods -}}
@@ -61,6 +51,8 @@
 {{- set $typeMap "timestamp" "DateTime" -}}
 {{- set $typeMap "map" "Map" -}}
 {{- set $typeMap "[]" "List" -}}
+
+{{- template "validateSchema" dict "WebrpcVersion" .WebrpcVersion "WebrpcGenVersion" .WebrpcGenVersion "Types" .Types "Services" .Services -}}
 
 // {{.SchemaName}} {{.SchemaVersion}} {{.SchemaHash}}
 // --
