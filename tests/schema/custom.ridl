@@ -3,21 +3,6 @@ webrpc = v1
 name = flutter-go
 version = v1.0.0
 
-enum ItemTier: uint32
-    - REGULAR
-    - PREMIUM
-
-struct Item
-    - id: string
-    - name: string
-    - tier: ItemTier
-    - count: uint32
-    - createdAt?: timestamp
-
-struct ItemSummary
-    - id: string
-    - name: string
-
 struct CoreTypesOptional
     - mByte?: byte
     - mBool?: bool
@@ -54,12 +39,28 @@ struct CoreTypesRequired
     - mString: string
     - mTimestamp: timestamp
 
+struct Complex 
+    - coreList: []int32
+    - recursiveList: []Complex
+    - nestedList: [][]Complex
+    - optionalList?: []int32
+    - coreMap: map<string, timestamp>
+    - recursiveMap: map<string, Complex>
+    - nestedMap: map<string, map<int32, []Complex>>
+    - optionalMap?: map<string, timestamp>
+    - myEnum: MyEnum
+    - myEnumList: []MyEnum
+    - myEnumMap: map<string, MyEnum>
+    - myEnumOptional?: MyEnum
+
+enum MyEnum: uint32
+    - A
+    - B
+    - C
+    - D
+
 service CustomService
-  - Ping()
-  - GetItems() => (items: []ItemSummary)
-  - GetItem(itemId: string) => (item: Item)
-  - CreateItem(item: Item)
-  - PutOne(itemId: string)
-  - TakeOne(itemId: string)
-  - DeleteItem(itemId: string)
-  - Bingo(t: CoreTypesRequired)
+  - IdentityCoreTypesRequired(v: CoreTypesRequired) => (v: CoreTypesRequired)
+  - IdentityCoreTypesOptional(v: CoreTypesOptional) => (v: CoreTypesOptional)
+  - IdentityComplex(v: Complex) => (v: Complex)
+  - IdentityMyEnum(v: MyEnum) => (v: MyEnum)

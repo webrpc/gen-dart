@@ -4,34 +4,43 @@
 {{- $type := .Type}}
 {{- $typeMap := .TypeMap}}
 {{- $depth := (or .Depth 0)}}
+{{- $inPrefix := (or .InPrefix "v")}}
+{{- $outPrefix := (or .OutPrefix "r")}}
 {{- $optional := (or .Optional false)}}
 {{- $nIndents := (int (add $depth 2))}}
 {{- $ind := (repeat $nIndents "    ")}}
 
 {{- if isMapType $type}}
-{{$ind}}final {{template "type" dict "Type" $type "TypeMap" $typeMap}} r{{$depth}} = {};
+{{$ind}}final {{template "type" dict "Type" $type "TypeMap" $typeMap}} {{$outPrefix}}{{$depth}} = {};
 {{$ind}}for (MapEntry e{{$depth}} in v{{$depth}}.entries) {
 {{$ind}}    final dynamic v{{add $depth 1}} = e{{$depth}}.value;
-{{$ind}}    {{- template "fromJson" dict "Type" (mapValueType $type) "TypeMap" $typeMap "Depth" (add $depth 1) "Optional" .Optional}}
-{{$ind}}    r{{$depth}}[_cast<{{template "type" dict "Type" (mapKeyType $type) "TypeMap" $typeMap}}>(e{{$depth}}.key)] = r{{add $depth 1}};
+{{/* JSON requires all object keys to be strings, so we must double decode any non-string map keys */}}
+            {{- if eq (get $typeMap (mapKeyType $type)) "String"}}
+{{$ind}}    final String k{{add $depth 1}} = e{{$depth}}.key;
+            {{- else}}
+{{$ind}}    final dynamic k{{add $depth 1}} = jsonDecode(e{{$depth}}.key);
+            {{- end}}
+{{$ind}}    {{- template "fromJson" dict "Type" (mapValueType $type) "TypeMap" $typeMap "Depth" (add $depth 1) "Optional" false "InPrefix" "v" "OutPrefix" "rv"}}
+{{$ind}}    {{- template "fromJson" dict "Type" (mapKeyType $type) "TypeMap" $typeMap "Depth" (add $depth 1) "Optional" false "InPrefix" "k" "OutPrefix" "rk"}}
+{{$ind}}    {{$outPrefix}}{{$depth}}[rk{{add $depth 1}}] = rv{{add $depth 1}};
 {{$ind}}}
 
 {{- else if isListType $type}}
-{{$ind}}final {{template "type" dict "Type" $type "TypeMap" $typeMap}} r{{$depth}} = [];
-{{$ind}}for (dynamic v{{add $depth 1}} in v{{$depth}}) {
-{{$ind}}    {{- template "fromJson" dict "Type" (listElemType $type) "TypeMap" $typeMap "Depth" (add $depth 1) "Optional" .Optional}}
-{{$ind}}    r{{$depth}}.add(r{{add $depth 1}});
+{{$ind}}final {{template "type" dict "Type" $type "TypeMap" $typeMap}} {{$outPrefix}}{{$depth}} = [];
+{{$ind}}for (dynamic {{$inPrefix}}{{add $depth 1}} in {{$inPrefix}}{{$depth}}) {
+{{$ind}}    {{- template "fromJson" dict "Type" (listElemType $type) "TypeMap" $typeMap "Depth" (add $depth 1) "Optional" false "InPrefix" $inPrefix "OutPrefix" $outPrefix}}
+{{$ind}}    {{$outPrefix}}{{$depth}}.add({{$outPrefix}}{{add $depth 1}});
 {{$ind}}}
 
 {{- else if isCoreType $type}}
 {{- if (eq (get $typeMap $type) "DateTime")}}
-{{$ind}}final r{{$depth}} = {{ternary .Optional "_dateTimeFromJsonOptional" "_dateTimeFromJson"}}(v{{$depth}});
+{{$ind}}final {{$outPrefix}}{{$depth}} = {{ternary .Optional "_dateTimeFromJsonOptional" "_dateTimeFromJson"}}(v{{$depth}});
 {{- else}}
-{{$ind}}final {{get $typeMap $type}}{{if $optional}}?{{end}} r{{$depth}} = _cast<{{get $typeMap $type}}{{if $optional}}?{{end}}>(v{{$depth}});
+{{$ind}}final {{get $typeMap $type}}{{if $optional}}?{{end}} {{$outPrefix}}{{$depth}} = _cast<{{get $typeMap $type}}{{if $optional}}?{{end}}>({{$inPrefix}}{{$depth}});
 {{- end}}
 
 {{- else}}
-{{$ind}}final {{$type}} r{{$depth}} = {{$type}}.fromJson(v{{$depth}});
+{{$ind}}final {{$type}} {{$outPrefix}}{{$depth}} = {{$type}}.fromJson({{$inPrefix}}{{$depth}});
 
 {{- end -}}
 {{- end -}}

@@ -1,15 +1,11 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:test/test.dart';
 import 'package:tests/custom_client.dart';
 
 void main() {
   group('serialization', () {
-    test('simple', () {
-      expect(ItemSummary.fromJson(jsonDecode(jsonEncode(_itemSummary))), isNotNull);
-      expect(ItemTier.fromJson(jsonDecode(jsonEncode(_itemTier))), isNotNull);
-    });
-
     test('core types serialization works with required fields', () {
       expect(CoreTypesRequired.fromJson(jsonDecode(jsonEncode(_coreTypesRequired))), isNotNull);
     });
@@ -22,26 +18,13 @@ void main() {
       expect(CoreTypesOptional.fromJson(jsonDecode(jsonEncode(_coreTypesOptionalNull))), isNotNull);
     });
 
-    test('item serialization works', () {
-      expect(Item.fromJson(jsonDecode(jsonEncode(_item))), isNotNull);
+    test('complex serialization works with nested objects', () {
+      for (int i = 0; i < 10; i++) {
+        expect(Complex.fromJson(jsonDecode(jsonEncode(_genComplex(depth: 3)))), isNotNull);
+      }
     });
   });
 }
-
-final ItemSummary _itemSummary = ItemSummary(
-  id: "unique id",
-  name: "Item Summary",
-);
-
-final ItemTier _itemTier = ItemTier.PREMIUM;
-
-final Item _item = Item(
-  id: "unique_id",
-  name: "Item",
-  tier: ItemTier.PREMIUM,
-  count: 999,
-  createdAt: DateTime.now(),
-);
 
 final CoreTypesOptional _coreTypesOptionalNull = CoreTypesOptional(
   mByte: null,
@@ -99,3 +82,76 @@ final CoreTypesRequired _coreTypesRequired = CoreTypesRequired(
   mString: "hello, world",
   mTimestamp: DateTime.now(),
 );
+
+Complex _genComplex({
+  int depth = 2,
+  int nestedMaxSize = 3,
+}) {
+  final bool dive = depth > 0;
+  genNested() => _genComplex(
+        depth: depth - 1,
+        nestedMaxSize: nestedMaxSize,
+      );
+
+  genNestedList() => !dive ? List<Complex>.empty() : _genList(nestedMaxSize, genNested);
+
+  return Complex(
+    coreList: _genList(nestedMaxSize, () => _rand.nextInt(9999)),
+    recursiveList: genNestedList(),
+    nestedList: _genList(nestedMaxSize, genNestedList),
+    optionalList: _rand.nextBool() ? null : _genList(nestedMaxSize, () => _rand.nextInt(999)),
+    coreMap: Map.fromEntries(_genList(
+      nestedMaxSize,
+      () => MapEntry(_genKey(10), _genDateTime()),
+    )),
+    recursiveMap: !dive
+        ? {}
+        : Map.fromEntries(_genList(
+            nestedMaxSize,
+            () => MapEntry(_genKey(10), genNested()),
+          )),
+    nestedMap: Map.fromEntries(_genList(
+      nestedMaxSize,
+      () => MapEntry(
+        _genKey(10),
+        Map.fromEntries(_genList(
+          nestedMaxSize,
+          () => MapEntry(_rand.nextInt(9999), genNestedList()),
+        )),
+      ),
+    )),
+    optionalMap: _rand.nextBool()
+        ? null
+        : Map.fromEntries(_genList(
+            nestedMaxSize,
+            () => MapEntry(_genKey(10), _genDateTime()),
+          )),
+    myEnum: _choose(MyEnum.values),
+    myEnumList: _genList(nestedMaxSize, () => _choose(MyEnum.values)),
+    myEnumMap: Map.fromEntries(_genList(
+      nestedMaxSize,
+      () => MapEntry(_genKey(10), _choose(MyEnum.values)),
+    )),
+    myEnumOptional: _rand.nextBool() ? null : _choose(MyEnum.values),
+  );
+}
+
+String _genKey(int length) {
+  return List.generate(length, (_) => _choose(chars)).join('');
+}
+
+List<T> _genList<T>(int nMax, T Function() generator) {
+  return List.generate(_rand.nextInt(nMax), (_) => generator());
+}
+
+DateTime _genDateTime() {
+  final int msSinceEpoch = _rand.nextInt(max(1, min(4294967296, DateTime.now().millisecondsSinceEpoch)));
+  return DateTime.fromMillisecondsSinceEpoch(msSinceEpoch);
+}
+
+T _choose<T>(List<T> options) {
+  return options[_rand.nextInt(options.length)];
+}
+
+final List<String> chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('');
+final Random _rand = Random();
