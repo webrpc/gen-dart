@@ -32,7 +32,7 @@ enum {{$type.Name}} {
 {{end -}}
 
 {{- if isStructType $type }}
-class {{$type.Name}} {
+class {{$type.Name}} implements JsonSerializable {
     {{$type.Name}}({
         {{- range $i, $field := $type.Fields}}
         {{- if $i}},{{end}}
@@ -67,14 +67,11 @@ class {{$type.Name}} {
     {{end -}}
   
     {{if true}}{{end}}
+    @override
     Map<String, dynamic> toJson() {
         return {
             {{- range $i, $field := $type.Fields}}
-            {{- if (eq (toString $field.Type) "timestamp")}}
-            '{{- template "fieldName" dict "Field" .}}': {{ternary .Optional "_dateTimeToJsonOptional" "_dateTimeToJson"}}({{template "fieldName" dict "Field" .}}),
-            {{- else}}
-            '{{- template "fieldName" dict "Field" .}}': {{template "fieldName" dict "Field" .}},
-            {{- end}}
+            '{{- template "fieldName" dict "Field" .}}': _toJsonObject({{template "fieldName" dict "Field" .}}),
             {{- end}}
         };
     }
@@ -93,6 +90,17 @@ T _cast<T>(x) {
     }
 }
 
+dynamic _toJsonObject(dynamic v) {
+    if (v == null) return null;
+    if (v is DateTime) return v.toIso8601String();
+    // records are impossible to JSON serialize accurately because they do not
+    // retain runtime info about their structure
+    // see https://github.com/dart-lang/language/issues/2826
+    if (v is Record) return v.toString();
+    if (v is JsonSerializable) return v.toJson();
+    return v;
+}
+
 DateTime? _dateTimeFromJsonOptional(dynamic v0) {
   if (v0 == null) return null;
   return _dateTimeFromJson(v0);
@@ -106,12 +114,8 @@ DateTime _dateTimeFromJson(dynamic v0) {
   }
 }
 
-String? _dateTimeToJsonOptional(DateTime? timestamp) {
-    return timestamp?.toIso8601String();
-}
-
-String _dateTimeToJson(DateTime timestamp) {
-    return timestamp.toIso8601String();
+abstract interface class JsonSerializable {
+  dynamic toJson();
 }
 
 {{if $services}}

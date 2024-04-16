@@ -46,6 +46,7 @@ final Item _item = Item(
 final CoreTypesOptional _coreTypesOptionalNull = CoreTypesOptional(
   mByte: null,
   mBool: null,
+  mNull: null,
   mAny: null,
   mUint8: null,
   mUint16: null,
@@ -64,7 +65,8 @@ final CoreTypesOptional _coreTypesOptionalNull = CoreTypesOptional(
 final CoreTypesOptional _coreTypesOptionalNonNull = CoreTypesOptional(
   mByte: 1,
   mBool: false,
-  mAny: {'a': 3, "b": 4},
+  mNull: null,
+  mAny: (a: 3, b: '4', 'hello, world'),
   mUint8: 2,
   mUint16: 3,
   mUint32: 4,
@@ -82,6 +84,7 @@ final CoreTypesOptional _coreTypesOptionalNonNull = CoreTypesOptional(
 final CoreTypesRequired _coreTypesRequired = CoreTypesRequired(
   mByte: 1,
   mBool: false,
+  mNull: null,
   mAny: {'a': 3, "b": 4},
   mUint8: 2,
   mUint16: 3,

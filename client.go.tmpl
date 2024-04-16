@@ -18,12 +18,12 @@ class {{.Name}}Impl implements {{.Name}} {
     Future<{{template "methodOutputs" dict "Method" . "TypeMap" $typeMap}}> {{firstLetterToLower .Name}}({{template "methodInputs" dict "Method" . "TypeMap" $typeMap}}) async {
         HttpClientRequest request = await _httpClient.postUrl(_makeUri('{{.Name}}'));
         {{- if gt (len .Inputs) 0}}
-        final String body = jsonEncode({
+        final String body = jsonEncode(_toJsonObject({
         {{if true}}{{end}}
         {{- range $i, $input := .Inputs -}}
         {{indent 4 ""}}'{{$input.Name}}': {{$input.Name}},
         {{end -}}
-        });
+        }));
         _addHeaders(request, body.length);
         request.add(utf8.encode(body));
         {{else}}

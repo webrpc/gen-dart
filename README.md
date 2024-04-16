@@ -41,6 +41,14 @@ Change any of the following values by passing `-option="Value"` CLI flag to `web
 | `-client`            | generate client code       | unset (`false`)            |
 | `-server`            | generate server code       | unset (`false`)            |
 
+### Avoid using Records
+Because Dart [Records do not retain runtime information about their structure](https://github.com/dart-lang/language/issues/2826), it's impossible
+to reliably convert them to and from JSON. For this reason, we strongly advise against
+using Records in schema objects that have an `any` type (which maps to `dynamic` in Dart). In fact,
+you probably should not ever use the `any` type in your schema because it has ambigious
+structure which makes its structure meaningless on the other end of the wire. If you need a truly
+unstructured object, consider defining an internal convention and declaring it as a string in the schema.
+
 ## CONTRIBUTE
 
 ### Setup

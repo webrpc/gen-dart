@@ -21,8 +21,7 @@ struct ItemSummary
 struct CoreTypesOptional
     - mByte?: byte
     - mBool?: bool
-    # not allowed
-    # - mNull?: null
+    - mNull?: null
     - mAny?: any
     - mUint8?: uint8
     - mUint16?: uint16
@@ -41,8 +40,7 @@ struct CoreTypesRequired
     - mByte: byte
     - mBool: bool
     - mAny: any
-    # not allowed
-    # - mNull: null
+    - mNull: null
     - mUint8: uint8
     - mUint16: uint16
     - mUint32: uint32

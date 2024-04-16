@@ -31,7 +31,7 @@
 
 {{- /* Map webrpc core types to Dart. */ -}}
 {{- $typeMap := dict }}
-{{- set $typeMap "null" "null" -}}
+{{- set $typeMap "null" "Null" -}}
 {{- set $typeMap "any" "dynamic" -}}
 {{- set $typeMap "byte" "int" -}}
 {{- set $typeMap "bool" "bool" -}}
@@ -51,8 +51,6 @@
 {{- set $typeMap "timestamp" "DateTime" -}}
 {{- set $typeMap "map" "Map" -}}
 {{- set $typeMap "[]" "List" -}}
-
-{{- template "validateSchema" dict "WebrpcVersion" .WebrpcVersion "WebrpcGenVersion" .WebrpcGenVersion "Types" .Types "Services" .Services -}}
 
 // {{.SchemaName}} {{.SchemaVersion}} {{.SchemaHash}}
 // --
