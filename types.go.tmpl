@@ -100,33 +100,49 @@ T _cast<T>(x) {
 }
 
 dynamic toJsonObject(dynamic v) {
-  if (v == null) return null;
-  if (v is DateTime) return v.toIso8601String();
-  // records are impossible to JSON serialize accurately because they do not
-  // retain runtime info about their structure
-  // see https://github.com/dart-lang/language/issues/2826
-  if (v is Record) return v.toString();
-  if (v is List) return v.map(toJsonObject).toList();
-  if (v is Map) return v.map((key, value) => MapEntry(key.toString(), toJsonObject(value)));
-  if (v is JsonSerializable) return v.toJson();
-  return v;
+    if (v == null) return null;
+    if (v is DateTime) return v.toIso8601String();
+    if (v is BigInt) return v.toString();
+    // records are impossible to JSON serialize accurately because they do not
+    // retain runtime info about their structure
+    // see https://github.com/dart-lang/language/issues/2826
+    if (v is Record) return v.toString();
+    if (v is List) return v.map(toJsonObject).toList();
+    if (v is Map) return v.map((key, value) => MapEntry(key.toString(), toJsonObject(value)));
+    if (v is JsonSerializable) return v.toJson();
+    return v;
 }
 
 DateTime? _dateTimeFromJsonOptional(dynamic v0) {
-  if (v0 == null) return null;
-  return _dateTimeFromJson(v0);
+    if (v0 == null) return null;
+    return _dateTimeFromJson(v0);
 }
 
 DateTime _dateTimeFromJson(dynamic v0) {
-  if ((v0 != null) && (v0 is String)) {
-    return DateTime.parse(v0);
-  } else {
-    throw ArgumentError.value(v0, "v0", "Cannot parse $v0 to DateTime");
-  }
+    if ((v0 != null) && (v0 is String)) {
+        return DateTime.parse(v0);
+    } else {
+        throw ArgumentError.value(v0, "v0", "Cannot parse to DateTime");
+    }
+}
+
+BigInt? _bigIntFromJsonOptional(dynamic v0) {
+    if (v0 == null) return null;
+    return _bigIntFromJson(v0);
+}
+
+BigInt _bigIntFromJson(dynamic v0) {
+    if (v0 is String) {
+        return BigInt.parse(v0);
+    } else if (v0 is int) {
+        return BigInt.from(v0);
+    } else {
+        throw ArgumentError.value(v0, "v0", "Required non-null BigInt");
+    }
 }
 
 abstract interface class JsonSerializable {
-  dynamic toJson();
+    dynamic toJson();
 }
 
 {{if $services}}
