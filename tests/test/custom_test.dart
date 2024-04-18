@@ -90,8 +90,9 @@ void main() {
     });
 
     test('core type: uint64', () async {
-      final BigInt request = BigInt.parse("18446744073709551615");
-      httpClient.setResponse(uri('MUint64'), happy({'v': request.toString()}));
+      final int maxInt = 0x7FFFFFFFFFFFFFFF;
+      final int request = maxInt;
+      httpClient.setResponse(uri('MUint64'), happy({'v': request}));
       expect((await client.mUint64(request)).v, equals(request));
     });
 
@@ -114,8 +115,9 @@ void main() {
     });
 
     test('core type: int64', () async {
-      final BigInt request = BigInt.parse("-4294967296");
-      httpClient.setResponse(uri('MInt64'), happy({'v': request.toString()}));
+      final int minInt = -0x8000000000000000;
+      final int request = minInt;
+      httpClient.setResponse(uri('MInt64'), happy({'v': request}));
       expect((await client.mInt64(request)).v, equals(request));
     });
   });
@@ -148,11 +150,11 @@ final CoreTypesOptional _coreTypesOptionalNonNull = CoreTypesOptional(
   mUint8: 2,
   mUint16: 3,
   mUint32: 4,
-  mUint64: BigInt.from(5),
+  mUint64: 5,
   mInt8: -1,
   mInt16: -2,
   mInt32: -3,
-  mInt64: BigInt.from(-4),
+  mInt64: -4,
   mFloat32: 1.1,
   mFloat64: 2.2,
   mString: "hello, world",
@@ -167,11 +169,11 @@ final CoreTypesRequired _coreTypesRequired = CoreTypesRequired(
   mUint8: 2,
   mUint16: 3,
   mUint32: 4,
-  mUint64: BigInt.from(5),
+  mUint64: 5,
   mInt8: -1,
   mInt16: -2,
   mInt32: -3,
-  mInt64: BigInt.from(-4),
+  mInt64: -4,
   mFloat32: 1.1,
   mFloat64: 2.2,
   mString: "hello, world",
