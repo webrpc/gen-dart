@@ -80,6 +80,8 @@ const webRPCSchemaHash = "{{.SchemaHash}}";
 {{- end}}
 
 {{- if $opts.server}}
+{{- stderrPrintf "server generation not yet supported" -}}
+{{- exit 1 -}}
 {{- end}}
 
 {{template "types" dict "Types" .Types "Services" .Services "TypeMap" $typeMap}}

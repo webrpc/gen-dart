@@ -72,19 +72,19 @@ void main() {
     });
 
     test('core type: uint8', () async {
-      final int request = _rand.nextInt((pow(2, 8)) as int);
+      final int request = pow(2, 8).toInt();
       httpClient.setResponse(uri('MUint8'), happy({'v': request}));
       expect((await client.mUint8(request)).v, equals(request));
     });
 
     test('core type: uint16', () async {
-      final int request = _rand.nextInt((pow(2, 16)) as int);
+      final int request = pow(2, 16).toInt();
       httpClient.setResponse(uri('MUint16'), happy({'v': request}));
       expect((await client.mUint16(request)).v, equals(request));
     });
 
     test('core type: uint32', () async {
-      final int request = _rand.nextInt((pow(2, 32)) as int);
+      final int request = pow(2, 32).toInt();
       httpClient.setResponse(uri('MUint32'), happy({'v': request}));
       expect((await client.mUint32(request)).v, equals(request));
     });
@@ -97,19 +97,19 @@ void main() {
     });
 
     test('core type: int8', () async {
-      final int request = _rand.nextInt((pow(2, 8)) as int);
+      final int request = pow(2, 8).toInt();
       httpClient.setResponse(uri('MInt8'), happy({'v': request}));
       expect((await client.mInt8(request)).v, equals(request));
     });
 
     test('core type: int16', () async {
-      final int request = _rand.nextInt((pow(2, 16)) as int);
+      final int request = pow(2, 16).toInt();
       httpClient.setResponse(uri('MInt16'), happy({'v': request}));
       expect((await client.mInt16(request)).v, equals(request));
     });
 
     test('core type: int32', () async {
-      final int request = _rand.nextInt((pow(2, 32)) as int);
+      final int request = pow(2, 32).toInt();
       httpClient.setResponse(uri('MInt32'), happy({'v': request}));
       expect((await client.mInt32(request)).v, equals(request));
     });
@@ -119,6 +119,30 @@ void main() {
       final int request = minInt;
       httpClient.setResponse(uri('MInt64'), happy({'v': request}));
       expect((await client.mInt64(request)).v, equals(request));
+    });
+
+    test('core type: float32', () async {
+      final double request = pow(2.0, 32).toDouble();
+      httpClient.setResponse(uri('MFloat32'), happy({'v': request}));
+      expect((await client.mFloat32(request)).v, equals(request));
+    });
+
+    test('core type: float64', () async {
+      final double request = pow(2.0, 64).toDouble();
+      httpClient.setResponse(uri('MFloat64'), happy({'v': request}));
+      expect((await client.mFloat64(request)).v, equals(request));
+    });
+
+    test('core type: string', () async {
+      final String request = _genKey(1000);
+      httpClient.setResponse(uri('MString'), happy({'v': request}));
+      expect((await client.mString(request)).v, equals(request));
+    });
+
+    test('core type: timestamp', () async {
+      final DateTime request = _genDateTime();
+      httpClient.setResponse(uri('MTimestamp'), happy({'v': request.toIso8601String()}));
+      expect((await client.mTimestamp(request)).v, equals(request));
     });
   });
 }

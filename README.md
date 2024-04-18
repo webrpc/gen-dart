@@ -49,6 +49,15 @@ you probably should not ever use the `any` type in your schema because it has am
 structure which makes its structure meaningless on the other end of the wire. If you need a truly
 unstructured object, consider defining an internal convention and declaring it as a string in the schema.
 
+### Handle 64-bit numbers yourself
+Numbers (`double`, `num`, `int`) in Dart can have up to 64 bits of width. However, if you are
+using Flutter and building for web, [numbers are limited to ~53 bits](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER). In brief, 
+the consequence of this is that if your server sends a JSON number that is too big, it may be
+truncated - the value will change - according to the platform (language + architecture) being used.
+So, if you expected to use "wide" numbers (less than -(2^53 -1) or more than 2^53 - 1), you
+should package those numbers as a string and use the appropriate tools to handle them inside
+your app (such as `BigInt` in Dart).
+
 ## CONTRIBUTE
 
 ### Setup
