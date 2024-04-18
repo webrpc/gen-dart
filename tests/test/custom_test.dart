@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
@@ -22,6 +23,100 @@ void main() {
       for (int i = 0; i < 10; i++) {
         expect(Complex.fromJson(jsonDecode(jsonEncode(_genComplex(depth: 3)))), isNotNull);
       }
+    });
+  });
+
+  group('client correctly calls API', () {
+    final String baseUrl = 'http://bogus.com';
+    late MockHttpClient httpClient;
+    late CustomService client;
+
+    setUp(
+      // https://api.flutter.dev/flutter/dart-io/HttpOverrides-class.html
+      () {
+        httpClient = MockHttpClient();
+        client = CustomServiceImpl(baseUrl, httpClient);
+      },
+    );
+
+    WebrpcHttpResponse happy(dynamic body) {
+      return WebrpcHttpResponse(statusCode: 200, body: jsonEncode(body));
+    }
+
+    Uri uri(String method) {
+      return Uri.parse("$baseUrl/rpc/CustomService/$method");
+    }
+
+    test('core type: byte', () async {
+      final int request = _rand.nextInt(8);
+      httpClient.setResponse(uri('MByte'), happy({'v': request}));
+      expect((await client.mByte(request)).v, equals(request));
+    });
+
+    test('core type: bool', () async {
+      final bool request = _rand.nextBool();
+      httpClient.setResponse(uri('MBool'), happy({'v': request}));
+      expect((await client.mBool(request)).v, equals(request));
+    });
+
+    test('core type: any', () async {
+      final dynamic request = {'hello': 'world', 'goodbye': 3};
+      httpClient.setResponse(uri('MAny'), happy({'v': request}));
+      expect((await client.mAny(request)).v, equals(request));
+    });
+
+    test('core type: null', () async {
+      final Null request = null;
+      httpClient.setResponse(uri('MNull'), happy({'v': request}));
+      expect((await client.mNull(request)).v, equals(request));
+    });
+
+    test('core type: uint8', () async {
+      final int request = _rand.nextInt((pow(2, 8)) as int);
+      httpClient.setResponse(uri('MUint8'), happy({'v': request}));
+      expect((await client.mUint8(request)).v, equals(request));
+    });
+
+    test('core type: uint16', () async {
+      final int request = _rand.nextInt((pow(2, 16)) as int);
+      httpClient.setResponse(uri('MUint16'), happy({'v': request}));
+      expect((await client.mUint16(request)).v, equals(request));
+    });
+
+    test('core type: uint32', () async {
+      final int request = _rand.nextInt((pow(2, 32)) as int);
+      httpClient.setResponse(uri('MUint32'), happy({'v': request}));
+      expect((await client.mUint32(request)).v, equals(request));
+    });
+
+    test('core type: uint64', () async {
+      final BigInt request = BigInt.parse("18446744073709551615");
+      httpClient.setResponse(uri('MUint64'), happy({'v': request.toString()}));
+      expect((await client.mUint64(request)).v, equals(request));
+    });
+
+    test('core type: int8', () async {
+      final int request = _rand.nextInt((pow(2, 8)) as int);
+      httpClient.setResponse(uri('MInt8'), happy({'v': request}));
+      expect((await client.mInt8(request)).v, equals(request));
+    });
+
+    test('core type: int16', () async {
+      final int request = _rand.nextInt((pow(2, 16)) as int);
+      httpClient.setResponse(uri('MInt16'), happy({'v': request}));
+      expect((await client.mInt16(request)).v, equals(request));
+    });
+
+    test('core type: int32', () async {
+      final int request = _rand.nextInt((pow(2, 32)) as int);
+      httpClient.setResponse(uri('MInt32'), happy({'v': request}));
+      expect((await client.mInt32(request)).v, equals(request));
+    });
+
+    test('core type: int64', () async {
+      final BigInt request = BigInt.parse("-4294967296");
+      httpClient.setResponse(uri('MInt64'), happy({'v': request.toString()}));
+      expect((await client.mInt64(request)).v, equals(request));
     });
   });
 }
@@ -53,11 +148,11 @@ final CoreTypesOptional _coreTypesOptionalNonNull = CoreTypesOptional(
   mUint8: 2,
   mUint16: 3,
   mUint32: 4,
-  mUint64: 5,
+  mUint64: BigInt.from(5),
   mInt8: -1,
   mInt16: -2,
   mInt32: -3,
-  mInt64: -4,
+  mInt64: BigInt.from(-4),
   mFloat32: 1.1,
   mFloat64: 2.2,
   mString: "hello, world",
@@ -72,11 +167,11 @@ final CoreTypesRequired _coreTypesRequired = CoreTypesRequired(
   mUint8: 2,
   mUint16: 3,
   mUint32: 4,
-  mUint64: 5,
+  mUint64: BigInt.from(5),
   mInt8: -1,
   mInt16: -2,
   mInt32: -3,
-  mInt64: -4,
+  mInt64: BigInt.from(-4),
   mFloat32: 1.1,
   mFloat64: 2.2,
   mString: "hello, world",
@@ -155,3 +250,22 @@ T _choose<T>(List<T> options) {
 
 final List<String> chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('');
 final Random _rand = Random();
+
+class MockHttpClient implements WebrpcHttpClient {
+  Map<Uri, WebrpcHttpResponse> responses = {};
+
+  void setResponse(Uri uri, WebrpcHttpResponse response) {
+    responses[uri] = response;
+  }
+
+  @override
+  Future<WebrpcHttpResponse> post(WebrpcHttpRequest request) {
+    return Future.microtask(() {
+      if (responses[request.uri] == null) {
+        throw StateError('Set the response');
+      } else {
+        return responses[request.uri]!;
+      }
+    });
+  }
+}
