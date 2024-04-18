@@ -171,7 +171,7 @@ final Complex _complex = Complex(
     'd': {'e': 4}
   },
   namesList: ['a', 'b', 'c'],
-  numsList: [1, 2, 3],
+  numsList: [BigInt.from(1), BigInt.from(2), BigInt.from(3)],
   doubleArray: [
     ['a', 'b', 'c'],
     ['d', 'e', 'f']
@@ -182,14 +182,14 @@ final Complex _complex = Complex(
     {},
     {'d': 4}
   ],
-  listOfUsers: [User(id: 1, USERNAME: 'AWM', role: 'goat')],
-  mapOfUsers: {'MLB': User(id: 2, USERNAME: 'MLB', role: 'ref')},
-  user: User(id: 3, USERNAME: 'FAQ', role: 'what'),
+  listOfUsers: [User(id: BigInt.from(1), USERNAME: 'AWM', role: 'goat')],
+  mapOfUsers: {'MLB': User(id: BigInt.from(2), USERNAME: 'MLB', role: 'ref')},
+  user: User(id: BigInt.from(3), USERNAME: 'FAQ', role: 'what'),
   status: Status.AVAILABLE,
 );
 
 final Simple _simple = Simple(id: 5, name: 'AWM');
 
-final User _user = User(id: 10, USERNAME: 'AWM', role: 'goat');
+final User _user = User(id: BigInt.from(10), USERNAME: 'AWM', role: 'goat');
 
 final Status _status = Status.AVAILABLE;
