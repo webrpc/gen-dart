@@ -144,6 +144,24 @@ void main() {
       httpClient.setResponse(uri('MTimestamp'), happy({'v': request.toIso8601String()}));
       expect((await client.mTimestamp(request)).v, equals(request));
     });
+
+    test('struct with required fields', () async {
+      final CoreTypesRequired request = _coreTypesRequired;
+      httpClient.setResponse(uri('CoreTypesRequired'), happy({'v': request}));
+      expect((await client.coreTypesRequired(request)).v, isNotNull);
+    });
+
+    test('struct with optional fields all null', () async {
+      final CoreTypesOptional request = _coreTypesOptionalNull;
+      httpClient.setResponse(uri('CoreTypesOptional'), happy({'v': request}));
+      expect((await client.coreTypesOptional(request)).v, isNotNull);
+    });
+
+    test('struct with optional fields all non-null', () async {
+      final CoreTypesOptional request = _coreTypesOptionalNonNull;
+      httpClient.setResponse(uri('CoreTypesOptional'), happy({'v': request}));
+      expect((await client.coreTypesOptional(request)).v, isNotNull);
+    });
   });
 }
 
