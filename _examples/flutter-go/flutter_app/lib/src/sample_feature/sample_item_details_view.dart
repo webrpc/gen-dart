@@ -14,11 +14,33 @@ class SampleItemDetailsView extends StatefulWidget {
 
 class _SampleItemDetailsViewState extends State<SampleItemDetailsView> {
   late Future<({Item item})> itemFuture;
-  int itemCount = 0;
+  late Item item;
 
   @override
   void initState() {
     super.initState();
+    _updateItem();
+  }
+
+  void _onAddOne() {
+    context.read<ExampleService>().putOne(widget.summary.id).onError((error, stackTrace) {
+      // Generally you'd inform the user that something went wrong and, depending
+      // on the context, report something went wrong. For now, we're just going
+      // to undo our optimistic update.
+      debugPrint(_parseError(error));
+    }).then((_) => _updateItem());
+  }
+
+  void _onTakeOne() {
+    context.read<ExampleService>().takeOne(widget.summary.id).onError((error, stackTrace) {
+      // Generally you'd inform the user that something went wrong and, depending
+      // on the context, report something went wrong. For now, we're just going
+      // to undo our optimistic update.
+      debugPrint(_parseError(error));
+    }).then((_) => _updateItem());
+  }
+
+  void _updateItem() {
     // wait for the item to be fetched and display its details
     // see https://docs.flutter.dev/cookbook/networking/fetch-data
     //
@@ -30,41 +52,9 @@ class _SampleItemDetailsViewState extends State<SampleItemDetailsView> {
     final ExampleService service = context.read<ExampleService>();
     itemFuture = service.getItem(widget.summary.id).then((value) {
       setState(() {
-        itemCount = value.item.count;
+        item = value.item;
       });
       return value;
-    });
-  }
-
-  void _onAddOne() {
-    // optimistic update
-    setState(() {
-      itemCount += 1;
-    });
-    context.read<ExampleService>().putOne(widget.summary.id).onError((error, stackTrace) {
-      // Generally you'd inform the user that something went wrong and, depending
-      // on the context, report something went wrong. For now, we're just going
-      // to undo our optimistic update.
-      debugPrint(_parseError(error));
-      setState(() {
-        itemCount -= 1;
-      });
-    });
-  }
-
-  void _onTakeOne() {
-    // optimistic update
-    setState(() {
-      itemCount -= 1;
-    });
-    context.read<ExampleService>().takeOne(widget.summary.id).onError((error, stackTrace) {
-      // Generally you'd inform the user that something went wrong and, depending
-      // on the context, report something went wrong. For now, we're just going
-      // to undo our optimistic update.
-      debugPrint(_parseError(error));
-      setState(() {
-        itemCount += 1;
-      });
     });
   }
 
@@ -104,7 +94,7 @@ class _SampleItemDetailsViewState extends State<SampleItemDetailsView> {
                       style: const TextStyle(fontSize: 24),
                     ),
                     Text("Tier: ${item.tier}"),
-                    Text("Count: $itemCount"),
+                    Text("Count: ${item.count}"),
                     Text("Created: ${item.createdAt.toString()}"),
                     Text("Last update: ${item.lastUpdate?.toString() ?? "never"}"),
                   ],
@@ -123,6 +113,7 @@ class _SampleItemDetailsViewState extends State<SampleItemDetailsView> {
                           onPressed: _onTakeOne,
                           child: const Icon(Icons.remove),
                         ),
+                        const SizedBox(width: 15),
                         FloatingActionButton.small(
                           onPressed: _onAddOne,
                           child: const Icon(Icons.add),
