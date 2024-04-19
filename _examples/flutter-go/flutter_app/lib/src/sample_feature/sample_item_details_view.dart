@@ -39,8 +39,8 @@ class _SampleItemDetailsViewState extends State<SampleItemDetailsView> {
       body: FutureBuilder<({Item item})>(
         future: itemFuture,
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return Center(child: Text(snapshot.data!.item.tier.toString()));
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             String msg = "Error fetching  details for ${widget.summary.id}";
             if (snapshot.error is WebrpcError) {
@@ -51,9 +51,25 @@ class _SampleItemDetailsViewState extends State<SampleItemDetailsView> {
             return Center(
               child: Text(msg),
             );
-          } else {
-            return const Center(child: CircularProgressIndicator());
           }
+          final Item item = snapshot.data!.item;
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.name,
+                  style: const TextStyle(fontSize: 24),
+                ),
+                Text("Tier: ${item.tier}"),
+                Text("Count: ${item.count}"),
+                Text("Created: ${item.createdAt.toString()}"),
+                Text("Last update: ${item.lastUpdate?.toString() ?? "never"}"),
+              ],
+            ),
+          );
         },
       ),
     );

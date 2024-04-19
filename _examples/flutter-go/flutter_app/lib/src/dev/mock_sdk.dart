@@ -7,7 +7,7 @@ import 'dart:math';
 import 'package:flutter_app/generated/sdk.dart';
 
 class MockExampleService implements ExampleService {
-  final Map<String, Item> _items = {};
+  final Map<String, Item> _items = Map.fromEntries(_startingItems.map((e) => MapEntry(e.id, e)));
 
   @override
   Future<void> createItem(CreateItemRequest item) {
@@ -104,3 +104,62 @@ String _generateId() {
 Duration _delay() {
   return Duration(milliseconds: _rand.nextInt(500));
 }
+
+final List<Item> _startingItems = [
+  Item(
+      id: _generateId(),
+      name: "Cheese",
+      tier: ItemTier.REGULAR,
+      count: _rand.nextInt(3),
+      createdAt: DateTime.now(),
+      lastUpdate: null),
+  Item(
+      id: _generateId(),
+      name: "Romaine Lettuce",
+      tier: ItemTier.PREMIUM,
+      count: _rand.nextInt(3),
+      createdAt: DateTime.now(),
+      lastUpdate: null),
+  Item(
+      id: _generateId(),
+      name: "Iceberge Lettuce",
+      tier: ItemTier.REGULAR,
+      count: _rand.nextInt(3),
+      createdAt: DateTime.now(),
+      lastUpdate: null),
+  Item(
+      id: _generateId(),
+      name: "Heirloom Tomato",
+      tier: ItemTier.PREMIUM,
+      count: _rand.nextInt(3),
+      createdAt: DateTime.now(),
+      lastUpdate: null),
+  Item(
+      id: _generateId(),
+      name: "Hothouse Tomato",
+      tier: ItemTier.REGULAR,
+      count: _rand.nextInt(3),
+      createdAt: DateTime.now(),
+      lastUpdate: null),
+  Item(
+      id: _generateId(),
+      name: "White Bread",
+      tier: ItemTier.REGULAR,
+      count: _rand.nextInt(3),
+      createdAt: DateTime.now(),
+      lastUpdate: null),
+  Item(
+      id: _generateId(),
+      name: "Sourdough Bread",
+      tier: ItemTier.PREMIUM,
+      count: _rand.nextInt(3),
+      createdAt: DateTime.now(),
+      lastUpdate: null),
+  Item(
+      id: _generateId(),
+      name: "Mayonnaise",
+      tier: ItemTier.REGULAR,
+      count: _rand.nextInt(3),
+      createdAt: DateTime.now(),
+      lastUpdate: null),
+];
