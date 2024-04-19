@@ -39,8 +39,40 @@ void main() {
       },
     );
 
+    WebrpcHttpResponse makeResponse(dynamic body, [int status = 200]) {
+      return WebrpcHttpResponse(statusCode: status, body: jsonEncode(body));
+    }
+
     WebrpcHttpResponse happy(dynamic body) {
-      return WebrpcHttpResponse(statusCode: 200, body: jsonEncode(body));
+      return makeResponse(body);
+    }
+
+    WebrpcHttpResponse sadClient(ErrorId id) {
+      final WebrpcError error = WebrpcError.fromCode(id.code);
+      return makeResponse({'code': id.code}, error.httpStatus);
+    }
+
+    WebrpcHttpResponse sadServer(ErrorId id) {
+      final WebrpcException error = WebrpcException.fromCode(id.code);
+      return makeResponse({'code': id.code}, error.httpStatus);
+    }
+
+    Future<WebrpcError> catchWebrpcError(Future request) async {
+      try {
+        await request;
+      } on WebrpcError catch (e) {
+        return e;
+      }
+      fail("Expected a WebrpcError but didnt get one.");
+    }
+
+    Future<WebrpcException> catchWebrpcException(Future request) async {
+      try {
+        await request;
+      } on WebrpcException catch (e) {
+        return e;
+      }
+      fail("Expected a WebrpcException but didnt get one.");
     }
 
     Uri uri(String method) {
@@ -204,6 +236,48 @@ void main() {
       final ({int v1, int v2}) request = (v1: _rand.nextInt(9999), v2: _rand.nextInt(9999));
       httpClient.setResponse(uri('SendMulti'), happy(null));
       await client.sendMulti(request.v1, request.v2);
+    });
+
+    test('receive error - smallest code number - valid response', () async {
+      final ErrorId errorId = ErrorId.smallestCode;
+      httpClient.setResponse(uri('GetSchemaError'), sadClient(ErrorId.smallestCode));
+      final WebrpcError error = await catchWebrpcError(client.getSchemaError(errorId.code));
+      expect(error, isNotNull);
+    });
+
+    test('receive error - basic client error - correct error ID', () async {
+      final ErrorId errorId = ErrorId.basicClientError;
+      httpClient.setResponse(uri('GetSchemaError'), sadClient(errorId));
+      final WebrpcError error = await catchWebrpcError(client.getSchemaError(errorId.code));
+      expect(error.id, equals(errorId));
+    });
+
+    test('receive error - custom client error - correct error ID', () async {
+      final ErrorId errorId = ErrorId.customClientError;
+      httpClient.setResponse(uri('GetSchemaError'), sadClient(errorId));
+      final WebrpcError error = await catchWebrpcError(client.getSchemaError(errorId.code));
+      expect(error.id, equals(errorId));
+    });
+
+    test('receive error - basic server error - correct error ID', () async {
+      final ErrorId errorId = ErrorId.basicServerError;
+      httpClient.setResponse(uri('GetSchemaError'), sadServer(errorId));
+      final WebrpcException error = await catchWebrpcException(client.getSchemaError(errorId.code));
+      expect(error.id, equals(errorId));
+    });
+
+    test('receive error - custom server error - correct error ID', () async {
+      final ErrorId errorId = ErrorId.customServerError;
+      httpClient.setResponse(uri('GetSchemaError'), sadServer(errorId));
+      final WebrpcException error = await catchWebrpcException(client.getSchemaError(errorId.code));
+      expect(error.id, equals(errorId));
+    });
+
+    test('receive error - error with no specified http code - has default http code', () async {
+      final ErrorId errorId = ErrorId.defaultHttpCode;
+      httpClient.setResponse(uri('GetSchemaError'), sadClient(errorId));
+      final WebrpcError error = await catchWebrpcError(client.getSchemaError(errorId.code));
+      expect(error.httpStatus, equals(400));
     });
   });
 }
