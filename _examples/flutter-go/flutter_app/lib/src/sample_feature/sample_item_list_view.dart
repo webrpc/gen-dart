@@ -44,6 +44,14 @@ class _SampleItemListViewState extends State<SampleItemListView> {
     });
   }
 
+  Future<void> _onCreateItem(CreateItemRequest req) async {
+    await context.read<ExampleService>().createItem(req).onError((error, stackTrace) {
+      // Generally you'd inform the user that something went wrong and, depending
+      // on the context, report something went wrong.
+      debugPrint(_parseError(error));
+    }).whenComplete(_updateItems);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -130,7 +138,7 @@ class _SampleItemListViewState extends State<SampleItemListView> {
                   children: [
                     FloatingActionButton.large(
                         onPressed: () {
-                          debugPrint("hello");
+                          _dialogBuilder(context, _onCreateItem);
                         },
                         child: const Icon(Icons.add)),
                   ],
@@ -151,5 +159,106 @@ String _parseError(Object? err) {
     return err.message;
   } else {
     return err.toString();
+  }
+}
+
+Future<void> _dialogBuilder(BuildContext context, Future<void> Function(CreateItemRequest req) onSubmit) {
+  return showDialog<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return _CreateItemForm(onSubmit: onSubmit);
+    },
+  );
+}
+
+class _CreateItemForm extends StatefulWidget {
+  const _CreateItemForm({required this.onSubmit});
+
+  final Future<void> Function(CreateItemRequest req) onSubmit;
+
+  @override
+  State<_CreateItemForm> createState() => _CreateItemFormState();
+}
+
+class _CreateItemFormState extends State<_CreateItemForm> {
+  String? name;
+  ItemTier tier = ItemTier.REGULAR;
+
+  List<ItemTier> options = ItemTier.values;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Add an item'),
+      content: SizedBox(
+        width: 200,
+        height: 200,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+              child: TextField(
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Enter a name',
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    name = value;
+                  });
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+              child: DropdownButton<ItemTier>(
+                value: tier,
+                icon: const Icon(Icons.arrow_downward),
+                elevation: 16,
+                style: const TextStyle(color: Colors.deepPurple),
+                underline: Container(
+                  height: 2,
+                  color: Colors.deepPurpleAccent,
+                ),
+                onChanged: (ItemTier? value) {
+                  setState(() {
+                    tier = value!;
+                  });
+                },
+                items: options.map<DropdownMenuItem<ItemTier>>((ItemTier value) {
+                  return DropdownMenuItem<ItemTier>(
+                    value: value,
+                    child: Text(value.name),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          style: TextButton.styleFrom(
+            textStyle: Theme.of(context).textTheme.labelLarge,
+          ),
+          child: const Text('Cancel'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        TextButton(
+          style: TextButton.styleFrom(
+            textStyle: Theme.of(context).textTheme.labelLarge,
+          ),
+          child: const Text('Submit'),
+          onPressed: () {
+            // generally should inform the user they have an invalid form
+            if (name == null) return;
+            widget.onSubmit(CreateItemRequest(name: name!, tier: tier)).whenComplete(() => Navigator.of(context).pop());
+          },
+        ),
+      ],
+    );
   }
 }
