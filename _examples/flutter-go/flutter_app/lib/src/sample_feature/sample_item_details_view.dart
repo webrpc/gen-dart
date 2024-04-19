@@ -25,19 +25,17 @@ class _SampleItemDetailsViewState extends State<SampleItemDetailsView> {
   void _onAddOne() {
     context.read<ExampleService>().putOne(widget.summary.id).onError((error, stackTrace) {
       // Generally you'd inform the user that something went wrong and, depending
-      // on the context, report something went wrong. For now, we're just going
-      // to undo our optimistic update.
+      // on the context, report something went wrong.
       debugPrint(_parseError(error));
-    }).then((_) => _updateItem());
+    }).whenComplete(_updateItem);
   }
 
   void _onTakeOne() {
     context.read<ExampleService>().takeOne(widget.summary.id).onError((error, stackTrace) {
       // Generally you'd inform the user that something went wrong and, depending
-      // on the context, report something went wrong. For now, we're just going
-      // to undo our optimistic update.
+      // on the context, report something went wrong.
       debugPrint(_parseError(error));
-    }).then((_) => _updateItem());
+    }).whenComplete(_updateItem);
   }
 
   void _updateItem() {

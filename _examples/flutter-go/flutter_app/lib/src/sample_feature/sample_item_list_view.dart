@@ -19,20 +19,29 @@ class SampleItemListView extends StatefulWidget {
 
 class _SampleItemListViewState extends State<SampleItemListView> {
   late Future<({List<ItemSummary> items})> itemsFuture;
+  List<ItemSummary> items = [];
 
   @override
   void initState() {
     super.initState();
-    // wait for the items to be fetched and display their summaries
-    // see https://docs.flutter.dev/cookbook/networking/fetch-data
-    //
-    // be sure to import the 'provider' package to get access to the extension
-    // that lets you "read" the SDK instance created in main.dart
-    //
-    // note that generally you'd use a controller that holds some state
-    // for you rather than call the service directly
-    final ExampleService service = context.read<ExampleService>();
-    itemsFuture = service.getItems();
+    _updateItems();
+  }
+
+  void _onDeleteItem(String itemId) {
+    context.read<ExampleService>().deleteItem(itemId).onError((error, stackTrace) {
+      // Generally you'd inform the user that something went wrong and, depending
+      // on the context, report something went wrong.
+      debugPrint(_parseError(error));
+    }).whenComplete(_updateItems);
+  }
+
+  void _updateItems() {
+    itemsFuture = context.read<ExampleService>().getItems().then((value) {
+      setState(() {
+        items = value.items;
+      });
+      return value;
+    });
   }
 
   @override
@@ -86,13 +95,17 @@ class _SampleItemListViewState extends State<SampleItemListView> {
                 restorationId: 'sampleItemListView',
                 itemCount: items.length,
                 itemBuilder: (BuildContext context, int index) {
-                  final item = items[index];
+                  final ItemSummary item = items[index];
 
                   return ListTile(
                       title: Text(item.name),
                       leading: const CircleAvatar(
                         // Display the Flutter Logo image asset.
                         foregroundImage: AssetImage('assets/images/flutter_logo.png'),
+                      ),
+                      trailing: IconButton.filled(
+                        onPressed: () => _onDeleteItem(item.id),
+                        icon: const Icon(Icons.delete),
                       ),
                       onTap: () {
                         Navigator.push(
@@ -128,5 +141,15 @@ class _SampleItemListViewState extends State<SampleItemListView> {
         ],
       ),
     );
+  }
+}
+
+String _parseError(Object? err) {
+  if (err is WebrpcError) {
+    return err.message;
+  } else if (err is WebrpcException) {
+    return err.message;
+  } else {
+    return err.toString();
   }
 }
