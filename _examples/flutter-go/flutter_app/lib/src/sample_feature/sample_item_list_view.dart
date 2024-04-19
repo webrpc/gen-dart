@@ -38,30 +38,53 @@ class SampleItemListView extends StatelessWidget {
       // In contrast to the default ListView constructor, which requires
       // building all Widgets up front, the ListView.builder constructor lazily
       // builds Widgets as they’re scrolled into view.
-      body: ListView.builder(
-        // Providing a restorationId allows the ListView to restore the
-        // scroll position when a user leaves and returns to the app after it
-        // has been killed while running in the background.
-        restorationId: 'sampleItemListView',
-        itemCount: items.length,
-        itemBuilder: (BuildContext context, int index) {
-          final item = items[index];
+      body: Stack(
+        children: [
+          ListView.builder(
+            // Providing a restorationId allows the ListView to restore the
+            // scroll position when a user leaves and returns to the app after it
+            // has been killed while running in the background.
+            restorationId: 'sampleItemListView',
+            itemCount: items.length,
+            itemBuilder: (BuildContext context, int index) {
+              final item = items[index];
 
-          return ListTile(
-              title: Text(item.name),
-              leading: const CircleAvatar(
-                // Display the Flutter Logo image asset.
-                foregroundImage: AssetImage('assets/images/flutter_logo.png'),
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SampleItemDetailsView(summary: item),
+              return ListTile(
+                  title: Text(item.name),
+                  leading: const CircleAvatar(
+                    // Display the Flutter Logo image asset.
+                    foregroundImage: AssetImage('assets/images/flutter_logo.png'),
                   ),
-                );
-              });
-        },
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SampleItemDetailsView(summary: item),
+                      ),
+                    );
+                  });
+            },
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    FloatingActionButton.extended(
+                        onPressed: () {
+                          debugPrint("hello");
+                        },
+                        label: const Icon(Icons.add)),
+                  ],
+                ),
+              )
+            ],
+          )
+        ],
       ),
     );
   }
