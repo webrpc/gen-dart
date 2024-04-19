@@ -1,0 +1,36 @@
+webrpc = v1
+
+name = flutter-go
+version = v1.0.0
+
+service ExampleService
+    - GetItems() => (items: []ItemSummary)
+    - GetItem(itemId: string) => (item: Item)
+    - CreateItem(item: CreateItemRequest)
+    - PutOne(itemId: string)
+    - TakeOne(itemId: string)
+    - DeleteItem(itemId: string)
+
+enum ItemTier: uint32
+    - REGULAR
+    - PREMIUM
+
+struct Item
+    - id: string
+    - name: string
+    - tier: ItemTier
+    - count: uint32
+    - createdAt: timestamp
+    - lastUpdate?: timestamp
+
+struct CreateItemRequest
+    - name: string
+    - tier: ItemTier
+
+struct ItemSummary
+    - id: string
+    - name: string
+
+error 1 ItemExists "item already exists" HTTP 409
+error 2 NoSuchItem "no such item"  HTTP 404
+error 3 OutOfStock "item out of stock"  HTTP 409
