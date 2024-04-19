@@ -36,7 +36,7 @@ webrpcgen="$webrpc_root/webrpc-gen"
 webrpctest="$webrpc_root/webrpc-test"
 
 ./$webrpctest -version
-# ./$webrpctest -print-schema > $ref_schema
+./$webrpctest -print-schema > $ref_schema
 ./$webrpcgen -schema=$ref_schema -target=../ -client -out=lib/ref_client.dart
 
 ./$webrpcgen -schema="schema/custom.ridl" -target=../ -client -out=lib/custom_client.dart

@@ -162,6 +162,49 @@ void main() {
       httpClient.setResponse(uri('CoreTypesOptional'), happy({'v': request}));
       expect((await client.coreTypesOptional(request)).v, isNotNull);
     });
+
+    test('core type: list', () async {
+      final List<int> request = _genList(10, () => _rand.nextInt(999));
+      httpClient.setResponse(uri('MList'), happy({'v': request}));
+      expect((await client.mList(request)).v, isNotNull);
+    });
+
+    test('core type: map', () async {
+      final Map<int, String> request = Map.fromEntries(_genList(10, () => MapEntry(_rand.nextInt(999), _genKey(10))));
+      httpClient.setResponse(uri('MMap'), happy({'v': request.map((key, value) => MapEntry(key.toString(), value))}));
+      expect((await client.mMap(request)).v, isNotNull);
+    });
+
+    test('no request or response - doesnt throw', () async {
+      httpClient.setResponse(uri('Ping'), happy(null));
+      await client.ping();
+    });
+
+    test('no request and single result', () async {
+      final int response = _rand.nextInt(9999);
+      httpClient.setResponse(uri('GetOne'), happy({'v': response}));
+      expect((await client.getOne()).v, equals(response));
+    });
+
+    test('no request and multiple results', () async {
+      final ({int v1, int v2}) expected = (v1: _rand.nextInt(9999), v2: _rand.nextInt(9999));
+      httpClient.setResponse(uri('GetMulti'), happy({'v1': expected.v1, 'v2': expected.v2}));
+      final result = await client.getMulti();
+      expect(result.v1, equals(expected.v1));
+      expect(result.v2, equals(expected.v2));
+    });
+
+    test('send one with no response - doesnt throw', () async {
+      final int request = _rand.nextInt(9999);
+      httpClient.setResponse(uri('SendOne'), happy(null));
+      await client.sendOne(request);
+    });
+
+    test('send multiple with no response - doesnt throw', () async {
+      final ({int v1, int v2}) request = (v1: _rand.nextInt(9999), v2: _rand.nextInt(9999));
+      httpClient.setResponse(uri('SendMulti'), happy(null));
+      await client.sendMulti(request.v1, request.v2);
+    });
   });
 }
 
