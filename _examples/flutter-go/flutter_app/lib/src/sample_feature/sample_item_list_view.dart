@@ -115,11 +115,11 @@ class _SampleItemListViewState extends State<SampleItemListView> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    FloatingActionButton.extended(
+                    FloatingActionButton.large(
                         onPressed: () {
                           debugPrint("hello");
                         },
-                        label: const Icon(Icons.add)),
+                        child: const Icon(Icons.add)),
                   ],
                 ),
               )
