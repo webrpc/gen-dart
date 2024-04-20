@@ -11,24 +11,34 @@ This generator, from a webrpc schema/design file will code-generate:
 1. Client -- an isomorphic/universal Dart client to speak to a webrpc server using the
 provided schema. This client is compatible with any webrpc server language (ie. Go, nodejs, etc.).
 
-2. Server -- a Dart server handler. See examples.
+2. Server -- not yet supported
+
+## Dependencies
+The generated client requires the standard `http` package to function. Add it to your pubspec.yaml 
+in your Dart or Flutter project
+
+```
+dependencies:
+  # ... other dependencies
+  http: ^1.1.0
+```
 
 ## Usage
 
 ```
-webrpc-gen -schema=example.ridl -target=dart -server -client -out=./example.gen.dart
+webrpc-gen -schema=example.ridl -target=dart -client -out=./example.gen.dart
 ```
 
 or 
 
 ```
-webrpc-gen -schema=example.ridl -target=github.com/webrpc/gen-dart@v0.17.2 -server -client -out=./example.gen.dart
+webrpc-gen -schema=example.ridl -target=github.com/webrpc/gen-dart@v0.17.2 -client -out=./example.gen.dart
 ```
 
 or
 
 ```
-webrpc-gen -schema=example.ridl -target=./local-templates-on-disk -server -client -out=./example.gen.dart
+webrpc-gen -schema=example.ridl -target=./local-templates-on-disk -client -out=./example.gen.dart
 ```
 
 As you can see, the `-target` supports default `dart`, any git URI, or a local folder

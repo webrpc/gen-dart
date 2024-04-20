@@ -35,5 +35,5 @@ path/to/webrpc-gen -schema=./service.ridl -target=../../ -client -out=flutter_ap
 
 To generate the server
 ```bash
-path/to/webrpc-gen -schema=./service.ridl -target=go -server -out=tbd
+path/to/webrpc-gen -schema=./service.ridl -target=golang -server -out=go_server/server.go
 ```

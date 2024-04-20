@@ -30,7 +30,7 @@ class {{.Name}}Impl implements {{.Name}} {
         {{end -}}
         WebrpcHttpRequest request = WebrpcHttpRequest(
             uri: _makeUri('{{.Name}}'),
-            headers: _makeHeaders(body),
+            headers: _makeHeaders(),
             body: body,
         );
         final WebrpcHttpResponse response = await _httpClient.post(request);
@@ -62,9 +62,8 @@ class {{.Name}}Impl implements {{.Name}} {
         return Uri.parse(_baseUrl + name);
     }
 
-    static Map<String, Object> _makeHeaders(String? body) {
+    static Map<String, Object> _makeHeaders() {
         return {
-            'Content-Length': body == null ? 0 : body.length,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
         };
@@ -92,20 +91,14 @@ class {{.Name}}Impl implements {{.Name}} {
 {{- end}}
 
 class _MainWebrpcHttpClient implements WebrpcHttpClient {
-  final HttpClient _httpClient = HttpClient();
-
   @override
   Future<WebrpcHttpResponse> post(WebrpcHttpRequest request) async {
-    final HttpClientRequest httpRequest = await _httpClient.postUrl(request.uri);
-    for (MapEntry<String, Object> header in request.headers.entries) {
-      httpRequest.headers.set(header.key, header.value);
-    }
-    if (request.body != null) {
-      httpRequest.add(utf8.encode(request.body!));
-    }
-    final HttpClientResponse httpResponse = await httpRequest.close();
-    final String responseBody = await utf8.decodeStream(httpResponse);
-    return WebrpcHttpResponse(statusCode: httpResponse.statusCode, body: responseBody);
+    final http.Response response = await http.post(
+      request.uri,
+      body: request.body == null ? null : utf8.encode(request.body!),
+      headers: request.headers.map((key, value) => MapEntry(key, value.toString())),
+    );
+    return WebrpcHttpResponse(statusCode: response.statusCode, body: response.body);
   }
 }
 

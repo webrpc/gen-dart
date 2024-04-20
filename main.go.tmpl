@@ -62,8 +62,8 @@
 
 {{- if $opts.client}}
 import 'dart:convert';
-import 'dart:io';
 import 'dart:async';
+import 'package:http/http.dart' as http;
 {{- end}}
 
 /// WebRPC description and code-gen version

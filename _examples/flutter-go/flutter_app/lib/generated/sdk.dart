@@ -6,8 +6,8 @@
 // ignore_for_file: non_constant_identifier_names
 // ignore_for_file: constant_identifier_names
 import 'dart:convert';
-import 'dart:io';
 import 'dart:async';
+import 'package:http/http.dart' as http;
 
 /// WebRPC description and code-gen version
 const webRPCVersion = "v1";
@@ -19,170 +19,157 @@ const webRPCSchemaVersion = "v1.0.0";
 const webRPCSchemaHash = "2a329e90418316407f201f4e41ea13510b20bc92";
 
 class ExampleServiceImpl implements ExampleService {
-    ExampleServiceImpl(String hostname, [WebrpcHttpClient? httpClient])
-        : _baseUrl = '$hostname/rpc/ExampleService/',
-          _httpClient = httpClient ?? _MainWebrpcHttpClient();
+  ExampleServiceImpl(String hostname, [WebrpcHttpClient? httpClient])
+      : _baseUrl = '$hostname/rpc/ExampleService/',
+        _httpClient = httpClient ?? _MainWebrpcHttpClient();
 
-    final String _baseUrl;
-    final WebrpcHttpClient _httpClient;
+  final String _baseUrl;
+  final WebrpcHttpClient _httpClient;
 
-    @override
-    Future<({List<ItemSummary> items})> getItems() async {
-        final String? body = null;
-        WebrpcHttpRequest request = WebrpcHttpRequest(
-            uri: _makeUri('GetItems'),
-            headers: _makeHeaders(body),
-            body: body,
-        );
-        final WebrpcHttpResponse response = await _httpClient.post(request);
-        
-        await _handleResponse(response);
+  @override
+  Future<({List<ItemSummary> items})> getItems() async {
+    final String? body = null;
+    WebrpcHttpRequest request = WebrpcHttpRequest(
+      uri: _makeUri('GetItems'),
+      headers: _makeHeaders(body),
+      body: body,
+    );
+    final WebrpcHttpResponse response = await _httpClient.post(request);
+
+    await _handleResponse(response);
+    final Map<String, dynamic> json = jsonDecode(response.body);
+    return (items: _getItemsItems(json['items']),);
+  }
+
+  static List<ItemSummary> _getItemsItems(dynamic v0) {
+    final List<ItemSummary> r0 = [];
+    for (dynamic v1 in v0) {
+      final ItemSummary r1 = ItemSummary.fromJson(v1);
+      r0.add(r1);
+    }
+    return r0;
+  }
+
+  @override
+  Future<({Item item})> getItem(String itemId) async {
+    final String body = jsonEncode(toJsonObject({
+      'itemId': itemId,
+    }));
+    WebrpcHttpRequest request = WebrpcHttpRequest(
+      uri: _makeUri('GetItem'),
+      headers: _makeHeaders(body),
+      body: body,
+    );
+    final WebrpcHttpResponse response = await _httpClient.post(request);
+
+    await _handleResponse(response);
+    final Map<String, dynamic> json = jsonDecode(response.body);
+    return (item: _getItemItem(json['item']),);
+  }
+
+  static Item _getItemItem(dynamic v0) {
+    final Item r0 = Item.fromJson(v0);
+    return r0;
+  }
+
+  @override
+  Future<void> createItem(CreateItemRequest item) async {
+    final String body = jsonEncode(toJsonObject({
+      'item': item,
+    }));
+    WebrpcHttpRequest request = WebrpcHttpRequest(
+      uri: _makeUri('CreateItem'),
+      headers: _makeHeaders(body),
+      body: body,
+    );
+    final WebrpcHttpResponse response = await _httpClient.post(request);
+
+    await _handleResponse(response);
+  }
+
+  @override
+  Future<void> putOne(String itemId) async {
+    final String body = jsonEncode(toJsonObject({
+      'itemId': itemId,
+    }));
+    WebrpcHttpRequest request = WebrpcHttpRequest(
+      uri: _makeUri('PutOne'),
+      headers: _makeHeaders(body),
+      body: body,
+    );
+    final WebrpcHttpResponse response = await _httpClient.post(request);
+
+    await _handleResponse(response);
+  }
+
+  @override
+  Future<void> takeOne(String itemId) async {
+    final String body = jsonEncode(toJsonObject({
+      'itemId': itemId,
+    }));
+    WebrpcHttpRequest request = WebrpcHttpRequest(
+      uri: _makeUri('TakeOne'),
+      headers: _makeHeaders(body),
+      body: body,
+    );
+    final WebrpcHttpResponse response = await _httpClient.post(request);
+
+    await _handleResponse(response);
+  }
+
+  @override
+  Future<void> deleteItem(String itemId) async {
+    final String body = jsonEncode(toJsonObject({
+      'itemId': itemId,
+    }));
+    WebrpcHttpRequest request = WebrpcHttpRequest(
+      uri: _makeUri('DeleteItem'),
+      headers: _makeHeaders(body),
+      body: body,
+    );
+    final WebrpcHttpResponse response = await _httpClient.post(request);
+
+    await _handleResponse(response);
+  }
+
+  Uri _makeUri(String name) {
+    return Uri.parse(_baseUrl + name);
+  }
+
+  static Map<String, Object> _makeHeaders(String? body) {
+    return {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+  }
+
+  Future<void> _handleResponse(WebrpcHttpResponse response) async {
+    if (response.statusCode >= 400) {
+      try {
         final Map<String, dynamic> json = jsonDecode(response.body);
-        return (
-            items: _getItemsItems(json['items']),
-        );
-    }
-    
-    static List<ItemSummary> _getItemsItems(dynamic v0) {
-        final List<ItemSummary> r0 = [];
-        for (dynamic v1 in v0) {
-        
-            final ItemSummary r1 = ItemSummary.fromJson(v1);
-            r0.add(r1);
+        final int webrpcErrorCode = json['code'];
+        if (response.statusCode >= 500) {
+          throw WebrpcException.fromCode(webrpcErrorCode);
+        } else {
+          throw WebrpcError.fromCode(webrpcErrorCode);
         }
-        return r0;
+      } on ArgumentError catch (_) {
+        // https://github.com/webrpc/webrpc/blob/master/gen/errors.go
+        throw WebrpcException.fromCode(-5);
+      }
     }
-
-    @override
-    Future<({Item item})> getItem(String itemId) async {
-        final String body = jsonEncode(toJsonObject({
-            'itemId': itemId,
-        }));
-        WebrpcHttpRequest request = WebrpcHttpRequest(
-            uri: _makeUri('GetItem'),
-            headers: _makeHeaders(body),
-            body: body,
-        );
-        final WebrpcHttpResponse response = await _httpClient.post(request);
-        
-        await _handleResponse(response);
-        final Map<String, dynamic> json = jsonDecode(response.body);
-        return (
-            item: _getItemItem(json['item']),
-        );
-    }
-    
-    static Item _getItemItem(dynamic v0) {
-        final Item r0 = Item.fromJson(v0);
-        return r0;
-    }
-
-    @override
-    Future<void> createItem(CreateItemRequest item) async {
-        final String body = jsonEncode(toJsonObject({
-            'item': item,
-        }));
-        WebrpcHttpRequest request = WebrpcHttpRequest(
-            uri: _makeUri('CreateItem'),
-            headers: _makeHeaders(body),
-            body: body,
-        );
-        final WebrpcHttpResponse response = await _httpClient.post(request);
-        
-        await _handleResponse(response);
-    }
-
-    @override
-    Future<void> putOne(String itemId) async {
-        final String body = jsonEncode(toJsonObject({
-            'itemId': itemId,
-        }));
-        WebrpcHttpRequest request = WebrpcHttpRequest(
-            uri: _makeUri('PutOne'),
-            headers: _makeHeaders(body),
-            body: body,
-        );
-        final WebrpcHttpResponse response = await _httpClient.post(request);
-        
-        await _handleResponse(response);
-    }
-
-    @override
-    Future<void> takeOne(String itemId) async {
-        final String body = jsonEncode(toJsonObject({
-            'itemId': itemId,
-        }));
-        WebrpcHttpRequest request = WebrpcHttpRequest(
-            uri: _makeUri('TakeOne'),
-            headers: _makeHeaders(body),
-            body: body,
-        );
-        final WebrpcHttpResponse response = await _httpClient.post(request);
-        
-        await _handleResponse(response);
-    }
-
-    @override
-    Future<void> deleteItem(String itemId) async {
-        final String body = jsonEncode(toJsonObject({
-            'itemId': itemId,
-        }));
-        WebrpcHttpRequest request = WebrpcHttpRequest(
-            uri: _makeUri('DeleteItem'),
-            headers: _makeHeaders(body),
-            body: body,
-        );
-        final WebrpcHttpResponse response = await _httpClient.post(request);
-        
-        await _handleResponse(response);
-    }
-
-    Uri _makeUri(String name) {
-        return Uri.parse(_baseUrl + name);
-    }
-
-    static Map<String, Object> _makeHeaders(String? body) {
-        return {
-            'Content-Length': body == null ? 0 : body.length,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        };
-    }
-
-    Future<void> _handleResponse(WebrpcHttpResponse response) async {
-        if (response.statusCode >= 400) {
-            try {
-                final Map<String, dynamic> json = jsonDecode(response.body);
-                final int webrpcErrorCode = json['code'];
-                if (response.statusCode >= 500) {
-                    throw WebrpcException.fromCode(webrpcErrorCode);
-
-                } else {
-                    throw WebrpcError.fromCode(webrpcErrorCode);
-                }
-            } on ArgumentError catch (_) {
-                // https://github.com/webrpc/webrpc/blob/master/gen/errors.go
-                throw WebrpcException.fromCode(-5);
-            }
-        }
-    }
+  }
 }
 
 class _MainWebrpcHttpClient implements WebrpcHttpClient {
-  final HttpClient _httpClient = HttpClient();
-
   @override
   Future<WebrpcHttpResponse> post(WebrpcHttpRequest request) async {
-    final HttpClientRequest httpRequest = await _httpClient.postUrl(request.uri);
-    for (MapEntry<String, Object> header in request.headers.entries) {
-      httpRequest.headers.set(header.key, header.value);
-    }
-    if (request.body != null) {
-      httpRequest.add(utf8.encode(request.body!));
-    }
-    final HttpClientResponse httpResponse = await httpRequest.close();
-    final String responseBody = await utf8.decodeStream(httpResponse);
-    return WebrpcHttpResponse(statusCode: httpResponse.statusCode, body: responseBody);
+    final http.Response response = await http.post(
+      request.uri,
+      body: request.body == null ? null : utf8.encode(request.body!),
+      headers: request.headers.map((key, value) => MapEntry(key, value.toString())),
+    );
+    return WebrpcHttpResponse(statusCode: response.statusCode, body: response.body);
   }
 }
 
@@ -209,399 +196,388 @@ class WebrpcHttpResponse {
   final String body;
 }
 
-
 enum ItemTier {
-    REGULAR,
-    PREMIUM;
+  REGULAR,
+  PREMIUM;
 
-    factory ItemTier.fromJson(dynamic json) {
-        switch (json) {
-            case 'REGULAR':
-                return ItemTier.REGULAR;
-            case 'PREMIUM':
-                return ItemTier.PREMIUM;
-            default:
-                throw ArgumentError.value(json);
-        }
+  factory ItemTier.fromJson(dynamic json) {
+    switch (json) {
+      case 'REGULAR':
+        return ItemTier.REGULAR;
+      case 'PREMIUM':
+        return ItemTier.PREMIUM;
+      default:
+        throw ArgumentError.value(json);
     }
+  }
 
-    String toJson() {
-        return name;
-    }
+  String toJson() {
+    return name;
+  }
 }
 
 class Item implements JsonSerializable {
-    Item({
-        required this.id,
-        required this.name,
-        required this.tier,
-        required this.count,
-        required this.createdAt,
-        required this.lastUpdate
-    });
-    
-    final String id;
-    final String name;
-    final ItemTier tier;
-    final int count;
-    final DateTime createdAt;
-    final DateTime? lastUpdate;
-  
-    Item.fromJson(Map<String, dynamic> json)
-        : id = _id(json['id']),
-          name = _name(json['name']),
-          tier = _tier(json['tier']),
-          count = _count(json['count']),
-          createdAt = _createdAt(json['createdAt']),
-          lastUpdate = _lastUpdate(json['lastUpdate']);
-          
-    static String _id(dynamic v0) {
-        if (v0 == null) throw WebrpcException.fromCode(ErrorId.webrpcBadResponse.code);
-        final String r0 = _cast<String>(v0);
-        return r0;
-    }
-    
-    static String _name(dynamic v0) {
-        if (v0 == null) throw WebrpcException.fromCode(ErrorId.webrpcBadResponse.code);
-        final String r0 = _cast<String>(v0);
-        return r0;
-    }
-    
-    static ItemTier _tier(dynamic v0) {
-        if (v0 == null) throw WebrpcException.fromCode(ErrorId.webrpcBadResponse.code);
-        final ItemTier r0 = ItemTier.fromJson(v0);
-        return r0;
-    }
-    
-    static int _count(dynamic v0) {
-        if (v0 == null) throw WebrpcException.fromCode(ErrorId.webrpcBadResponse.code);
-        final int r0 = _cast<int>(v0);
-        return r0;
-    }
-    
-    static DateTime _createdAt(dynamic v0) {
-        if (v0 == null) throw WebrpcException.fromCode(ErrorId.webrpcBadResponse.code);
-        final r0 = _dateTimeFromJson(v0);
-        return r0;
-    }
-    
-    static DateTime? _lastUpdate(dynamic v0) {
-        if (v0 == null) return null;
-        final r0 = _dateTimeFromJsonOptional(v0);
-        return r0;
-    }
-    
-    @override
-    Map<String, dynamic> toJson() {
-        return {
-            'id': toJsonObject(id),
-            'name': toJsonObject(name),
-            'tier': toJsonObject(tier),
-            'count': toJsonObject(count),
-            'createdAt': toJsonObject(createdAt),
-            'lastUpdate': toJsonObject(lastUpdate),
-        };
-    }
+  Item(
+      {required this.id,
+      required this.name,
+      required this.tier,
+      required this.count,
+      required this.createdAt,
+      required this.lastUpdate});
+
+  final String id;
+  final String name;
+  final ItemTier tier;
+  final int count;
+  final DateTime createdAt;
+  final DateTime? lastUpdate;
+
+  Item.fromJson(Map<String, dynamic> json)
+      : id = _id(json['id']),
+        name = _name(json['name']),
+        tier = _tier(json['tier']),
+        count = _count(json['count']),
+        createdAt = _createdAt(json['createdAt']),
+        lastUpdate = _lastUpdate(json['lastUpdate']);
+
+  static String _id(dynamic v0) {
+    if (v0 == null) throw WebrpcException.fromCode(ErrorId.webrpcBadResponse.code);
+    final String r0 = _cast<String>(v0);
+    return r0;
+  }
+
+  static String _name(dynamic v0) {
+    if (v0 == null) throw WebrpcException.fromCode(ErrorId.webrpcBadResponse.code);
+    final String r0 = _cast<String>(v0);
+    return r0;
+  }
+
+  static ItemTier _tier(dynamic v0) {
+    if (v0 == null) throw WebrpcException.fromCode(ErrorId.webrpcBadResponse.code);
+    final ItemTier r0 = ItemTier.fromJson(v0);
+    return r0;
+  }
+
+  static int _count(dynamic v0) {
+    if (v0 == null) throw WebrpcException.fromCode(ErrorId.webrpcBadResponse.code);
+    final int r0 = _cast<int>(v0);
+    return r0;
+  }
+
+  static DateTime _createdAt(dynamic v0) {
+    if (v0 == null) throw WebrpcException.fromCode(ErrorId.webrpcBadResponse.code);
+    final r0 = _dateTimeFromJson(v0);
+    return r0;
+  }
+
+  static DateTime? _lastUpdate(dynamic v0) {
+    if (v0 == null) return null;
+    final r0 = _dateTimeFromJsonOptional(v0);
+    return r0;
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'id': toJsonObject(id),
+      'name': toJsonObject(name),
+      'tier': toJsonObject(tier),
+      'count': toJsonObject(count),
+      'createdAt': toJsonObject(createdAt),
+      'lastUpdate': toJsonObject(lastUpdate),
+    };
+  }
 }
 
 class CreateItemRequest implements JsonSerializable {
-    CreateItemRequest({
-        required this.name,
-        required this.tier
-    });
-    
-    final String name;
-    final ItemTier tier;
-  
-    CreateItemRequest.fromJson(Map<String, dynamic> json)
-        : name = _name(json['name']),
-          tier = _tier(json['tier']);
-          
-    static String _name(dynamic v0) {
-        if (v0 == null) throw WebrpcException.fromCode(ErrorId.webrpcBadResponse.code);
-        final String r0 = _cast<String>(v0);
-        return r0;
-    }
-    
-    static ItemTier _tier(dynamic v0) {
-        if (v0 == null) throw WebrpcException.fromCode(ErrorId.webrpcBadResponse.code);
-        final ItemTier r0 = ItemTier.fromJson(v0);
-        return r0;
-    }
-    
-    @override
-    Map<String, dynamic> toJson() {
-        return {
-            'name': toJsonObject(name),
-            'tier': toJsonObject(tier),
-        };
-    }
+  CreateItemRequest({required this.name, required this.tier});
+
+  final String name;
+  final ItemTier tier;
+
+  CreateItemRequest.fromJson(Map<String, dynamic> json)
+      : name = _name(json['name']),
+        tier = _tier(json['tier']);
+
+  static String _name(dynamic v0) {
+    if (v0 == null) throw WebrpcException.fromCode(ErrorId.webrpcBadResponse.code);
+    final String r0 = _cast<String>(v0);
+    return r0;
+  }
+
+  static ItemTier _tier(dynamic v0) {
+    if (v0 == null) throw WebrpcException.fromCode(ErrorId.webrpcBadResponse.code);
+    final ItemTier r0 = ItemTier.fromJson(v0);
+    return r0;
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'name': toJsonObject(name),
+      'tier': toJsonObject(tier),
+    };
+  }
 }
 
 class ItemSummary implements JsonSerializable {
-    ItemSummary({
-        required this.id,
-        required this.name
-    });
-    
-    final String id;
-    final String name;
-  
-    ItemSummary.fromJson(Map<String, dynamic> json)
-        : id = _id(json['id']),
-          name = _name(json['name']);
-          
-    static String _id(dynamic v0) {
-        if (v0 == null) throw WebrpcException.fromCode(ErrorId.webrpcBadResponse.code);
-        final String r0 = _cast<String>(v0);
-        return r0;
-    }
-    
-    static String _name(dynamic v0) {
-        if (v0 == null) throw WebrpcException.fromCode(ErrorId.webrpcBadResponse.code);
-        final String r0 = _cast<String>(v0);
-        return r0;
-    }
-    
-    @override
-    Map<String, dynamic> toJson() {
-        return {
-            'id': toJsonObject(id),
-            'name': toJsonObject(name),
-        };
-    }
+  ItemSummary({required this.id, required this.name});
+
+  final String id;
+  final String name;
+
+  ItemSummary.fromJson(Map<String, dynamic> json)
+      : id = _id(json['id']),
+        name = _name(json['name']);
+
+  static String _id(dynamic v0) {
+    if (v0 == null) throw WebrpcException.fromCode(ErrorId.webrpcBadResponse.code);
+    final String r0 = _cast<String>(v0);
+    return r0;
+  }
+
+  static String _name(dynamic v0) {
+    if (v0 == null) throw WebrpcException.fromCode(ErrorId.webrpcBadResponse.code);
+    final String r0 = _cast<String>(v0);
+    return r0;
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      'id': toJsonObject(id),
+      'name': toJsonObject(name),
+    };
+  }
 }
 
-
 T _cast<T>(x) {
-    if ((x == null) && (null is T)) {
-        return x;
-    } else if (x is T) {
-        return x;
-    } else {
-        throw ArgumentError.value(x);
-    }
+  if ((x == null) && (null is T)) {
+    return x;
+  } else if (x is T) {
+    return x;
+  } else {
+    throw ArgumentError.value(x);
+  }
 }
 
 dynamic toJsonObject(dynamic v) {
-    if (v == null) return null;
-    if (v is DateTime) return v.toIso8601String();
-    if (v is BigInt) return v.toString();
-    // records are impossible to JSON serialize accurately because they do not
-    // retain runtime info about their structure
-    // see https://github.com/dart-lang/language/issues/2826
-    if (v is Record) return v.toString();
-    if (v is List) return v.map(toJsonObject).toList();
-    if (v is Map) return v.map((key, value) => MapEntry(key.toString(), toJsonObject(value)));
-    if (v is JsonSerializable) return v.toJson();
-    return v;
+  if (v == null) return null;
+  if (v is DateTime) return v.toIso8601String();
+  if (v is BigInt) return v.toString();
+  // records are impossible to JSON serialize accurately because they do not
+  // retain runtime info about their structure
+  // see https://github.com/dart-lang/language/issues/2826
+  if (v is Record) return v.toString();
+  if (v is List) return v.map(toJsonObject).toList();
+  if (v is Map) return v.map((key, value) => MapEntry(key.toString(), toJsonObject(value)));
+  if (v is JsonSerializable) return v.toJson();
+  return v;
 }
 
 DateTime? _dateTimeFromJsonOptional(dynamic v0) {
-    if (v0 == null) return null;
-    return _dateTimeFromJson(v0);
+  if (v0 == null) return null;
+  return _dateTimeFromJson(v0);
 }
 
 DateTime _dateTimeFromJson(dynamic v0) {
-    if ((v0 != null) && (v0 is String)) {
-        return DateTime.parse(v0);
-    } else {
-        throw ArgumentError.value(v0, "v0", "Cannot parse to DateTime");
-    }
+  if ((v0 != null) && (v0 is String)) {
+    return DateTime.parse(v0);
+  } else {
+    throw ArgumentError.value(v0, "v0", "Cannot parse to DateTime");
+  }
 }
 
 BigInt? _bigIntFromJsonOptional(dynamic v0) {
-    if (v0 == null) return null;
-    return _bigIntFromJson(v0);
+  if (v0 == null) return null;
+  return _bigIntFromJson(v0);
 }
 
 BigInt _bigIntFromJson(dynamic v0) {
-    if (v0 is String) {
-        return BigInt.parse(v0);
-    } else if (v0 is int) {
-        return BigInt.from(v0);
-    } else {
-        throw ArgumentError.value(v0, "v0", "Required non-null BigInt");
-    }
+  if (v0 is String) {
+    return BigInt.parse(v0);
+  } else if (v0 is int) {
+    return BigInt.from(v0);
+  } else {
+    throw ArgumentError.value(v0, "v0", "Required non-null BigInt");
+  }
 }
 
 abstract interface class JsonSerializable {
-    dynamic toJson();
+  dynamic toJson();
 }
 
-
 abstract interface class ExampleService {
-    Future<({List<ItemSummary> items})> getItems();
-    Future<({Item item})> getItem(String itemId);
-    Future<void> createItem(CreateItemRequest item);
-    Future<void> putOne(String itemId);
-    Future<void> takeOne(String itemId);
-    Future<void> deleteItem(String itemId);
+  Future<({List<ItemSummary> items})> getItems();
+  Future<({Item item})> getItem(String itemId);
+  Future<void> createItem(CreateItemRequest item);
+  Future<void> putOne(String itemId);
+  Future<void> takeOne(String itemId);
+  Future<void> deleteItem(String itemId);
 }
 
 /// Unrecoverable errors representing an invalid use of the API, bad schema, or
 /// failure in the core of Webrpc (i.e. a bug).
 class WebrpcError extends Error {
-    WebrpcError._({
-        required this.id, 
-        required this.message, 
-        required this.httpStatus,
-    });
-    
-    factory WebrpcError.fromCode(int code) {
-        switch (code) {
-            case 0:
-                return WebrpcError._(
-                    id: ErrorId.webrpcEndpoint, 
-                    message: 'endpoint error',
-                    httpStatus: 400,
-                );
-            
-            case -1:
-                return WebrpcError._(
-                    id: ErrorId.webrpcRequestFailed, 
-                    message: 'request failed',
-                    httpStatus: 400,
-                );
-            
-            case -2:
-                return WebrpcError._(
-                    id: ErrorId.webrpcBadRoute, 
-                    message: 'bad route',
-                    httpStatus: 404,
-                );
-            
-            case -3:
-                return WebrpcError._(
-                    id: ErrorId.webrpcBadMethod, 
-                    message: 'bad method',
-                    httpStatus: 405,
-                );
-            
-            case -4:
-                return WebrpcError._(
-                    id: ErrorId.webrpcBadRequest, 
-                    message: 'bad request',
-                    httpStatus: 400,
-                );
-            
-            case -8:
-                return WebrpcError._(
-                    id: ErrorId.webrpcClientDisconnected, 
-                    message: 'client disconnected',
-                    httpStatus: 400,
-                );
-            
-            case -9:
-                return WebrpcError._(
-                    id: ErrorId.webrpcStreamLost, 
-                    message: 'stream lost',
-                    httpStatus: 400,
-                );
-            
-            case -10:
-                return WebrpcError._(
-                    id: ErrorId.webrpcStreamFinished, 
-                    message: 'stream finished',
-                    httpStatus: 200,
-                );
-            
-            case 1:
-                return WebrpcError._(
-                    id: ErrorId.itemExists, 
-                    message: 'item already exists',
-                    httpStatus: 409,
-                );
-            
-            case 2:
-                return WebrpcError._(
-                    id: ErrorId.noSuchItem, 
-                    message: 'no such item',
-                    httpStatus: 404,
-                );
-            
-            case 3:
-                return WebrpcError._(
-                    id: ErrorId.outOfStock, 
-                    message: 'item out of stock',
-                    httpStatus: 409,
-                );
-            
-            default:
-                throw ArgumentError.value(code, "code", "Unrecognized");
-        }
-    }
+  WebrpcError._({
+    required this.id,
+    required this.message,
+    required this.httpStatus,
+  });
 
-    final ErrorId id;
-    final String message;
-    final int httpStatus;
+  factory WebrpcError.fromCode(int code) {
+    switch (code) {
+      case 0:
+        return WebrpcError._(
+          id: ErrorId.webrpcEndpoint,
+          message: 'endpoint error',
+          httpStatus: 400,
+        );
+
+      case -1:
+        return WebrpcError._(
+          id: ErrorId.webrpcRequestFailed,
+          message: 'request failed',
+          httpStatus: 400,
+        );
+
+      case -2:
+        return WebrpcError._(
+          id: ErrorId.webrpcBadRoute,
+          message: 'bad route',
+          httpStatus: 404,
+        );
+
+      case -3:
+        return WebrpcError._(
+          id: ErrorId.webrpcBadMethod,
+          message: 'bad method',
+          httpStatus: 405,
+        );
+
+      case -4:
+        return WebrpcError._(
+          id: ErrorId.webrpcBadRequest,
+          message: 'bad request',
+          httpStatus: 400,
+        );
+
+      case -8:
+        return WebrpcError._(
+          id: ErrorId.webrpcClientDisconnected,
+          message: 'client disconnected',
+          httpStatus: 400,
+        );
+
+      case -9:
+        return WebrpcError._(
+          id: ErrorId.webrpcStreamLost,
+          message: 'stream lost',
+          httpStatus: 400,
+        );
+
+      case -10:
+        return WebrpcError._(
+          id: ErrorId.webrpcStreamFinished,
+          message: 'stream finished',
+          httpStatus: 200,
+        );
+
+      case 1:
+        return WebrpcError._(
+          id: ErrorId.itemExists,
+          message: 'item already exists',
+          httpStatus: 409,
+        );
+
+      case 2:
+        return WebrpcError._(
+          id: ErrorId.noSuchItem,
+          message: 'no such item',
+          httpStatus: 404,
+        );
+
+      case 3:
+        return WebrpcError._(
+          id: ErrorId.outOfStock,
+          message: 'item out of stock',
+          httpStatus: 409,
+        );
+
+      default:
+        throw ArgumentError.value(code, "code", "Unrecognized");
+    }
+  }
+
+  final ErrorId id;
+  final String message;
+  final int httpStatus;
 }
 
 /// Recoverable errors that should generally be caught, representing a
 /// bad state or temporary failure.
 class WebrpcException implements Exception {
-    WebrpcException._({
-        required this.id, 
-        required this.message, 
-        required this.httpStatus,
-    });
-    
-    factory WebrpcException.fromCode(int code) {
-        switch (code) {
-            case -5:
-                return WebrpcException._(
-                    id: ErrorId.webrpcBadResponse, 
-                    message: 'bad response',
-                    httpStatus: 500,
-                );
-            
-            case -6:
-                return WebrpcException._(
-                    id: ErrorId.webrpcServerPanic, 
-                    message: 'server panic',
-                    httpStatus: 500,
-                );
-            
-            case -7:
-                return WebrpcException._(
-                    id: ErrorId.webrpcInternalError, 
-                    message: 'internal error',
-                    httpStatus: 500,
-                );
-            
-            default:
-                throw ArgumentError.value(code, "code", "Unrecognized code $code");
-        }
-    }
+  WebrpcException._({
+    required this.id,
+    required this.message,
+    required this.httpStatus,
+  });
 
-    final ErrorId id;
-    final String message;
-    final int httpStatus;
+  factory WebrpcException.fromCode(int code) {
+    switch (code) {
+      case -5:
+        return WebrpcException._(
+          id: ErrorId.webrpcBadResponse,
+          message: 'bad response',
+          httpStatus: 500,
+        );
+
+      case -6:
+        return WebrpcException._(
+          id: ErrorId.webrpcServerPanic,
+          message: 'server panic',
+          httpStatus: 500,
+        );
+
+      case -7:
+        return WebrpcException._(
+          id: ErrorId.webrpcInternalError,
+          message: 'internal error',
+          httpStatus: 500,
+        );
+
+      default:
+        throw ArgumentError.value(code, "code", "Unrecognized code $code");
+    }
+  }
+
+  final ErrorId id;
+  final String message;
+  final int httpStatus;
 }
 
 /// Unique ID of a custom schema error or base Webrpc error.
 enum ErrorId {
-    webrpcEndpoint(code: 0, name: 'WebrpcEndpoint'),
-    webrpcRequestFailed(code: -1, name: 'WebrpcRequestFailed'),
-    webrpcBadRoute(code: -2, name: 'WebrpcBadRoute'),
-    webrpcBadMethod(code: -3, name: 'WebrpcBadMethod'),
-    webrpcBadRequest(code: -4, name: 'WebrpcBadRequest'),
-    webrpcBadResponse(code: -5, name: 'WebrpcBadResponse'),
-    webrpcServerPanic(code: -6, name: 'WebrpcServerPanic'),
-    webrpcInternalError(code: -7, name: 'WebrpcInternalError'),
-    webrpcClientDisconnected(code: -8, name: 'WebrpcClientDisconnected'),
-    webrpcStreamLost(code: -9, name: 'WebrpcStreamLost'),
-    webrpcStreamFinished(code: -10, name: 'WebrpcStreamFinished'),
-    itemExists(code: 1, name: 'ItemExists'),
-    noSuchItem(code: 2, name: 'NoSuchItem'),
-    outOfStock(code: 3, name: 'OutOfStock');
+  webrpcEndpoint(code: 0, name: 'WebrpcEndpoint'),
+  webrpcRequestFailed(code: -1, name: 'WebrpcRequestFailed'),
+  webrpcBadRoute(code: -2, name: 'WebrpcBadRoute'),
+  webrpcBadMethod(code: -3, name: 'WebrpcBadMethod'),
+  webrpcBadRequest(code: -4, name: 'WebrpcBadRequest'),
+  webrpcBadResponse(code: -5, name: 'WebrpcBadResponse'),
+  webrpcServerPanic(code: -6, name: 'WebrpcServerPanic'),
+  webrpcInternalError(code: -7, name: 'WebrpcInternalError'),
+  webrpcClientDisconnected(code: -8, name: 'WebrpcClientDisconnected'),
+  webrpcStreamLost(code: -9, name: 'WebrpcStreamLost'),
+  webrpcStreamFinished(code: -10, name: 'WebrpcStreamFinished'),
+  itemExists(code: 1, name: 'ItemExists'),
+  noSuchItem(code: 2, name: 'NoSuchItem'),
+  outOfStock(code: 3, name: 'OutOfStock');
 
-    const ErrorId({
-        required this.code,
-        required this.name,
-    });
+  const ErrorId({
+    required this.code,
+    required this.name,
+  });
 
-    final int code;
-    final String name;
+  final int code;
+  final String name;
 }
-

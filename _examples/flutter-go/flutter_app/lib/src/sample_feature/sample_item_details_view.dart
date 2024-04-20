@@ -89,7 +89,7 @@ class _SampleItemDetailsViewState extends State<SampleItemDetailsView> {
                       item.name,
                       style: const TextStyle(fontSize: 24),
                     ),
-                    Text("Tier: ${item.tier}"),
+                    Text("Tier: ${item.tier.name}"),
                     Text("Count: ${item.count}"),
                     Text("Created: ${item.createdAt.toString()}"),
                     Text("Last update: ${item.lastUpdate?.toString() ?? "never"}"),
