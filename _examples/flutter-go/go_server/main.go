@@ -30,7 +30,7 @@ func main() {
 	if port == "" {
 		panic("Missing required environment variable SERVICE_PORT")
 	}
-	fmt.Printf("go_server listening on port %s", port)
+	fmt.Printf("go_server listening on port %s\n", port)
 	http.ListenAndServe(fmt.Sprintf(":%s", port), webprcHandler)
 }
 

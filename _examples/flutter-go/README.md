@@ -17,12 +17,14 @@ An example full-stack app using Flutter as the frontend and a minimal golang ser
 ## Try it out
 Start the server (after installing Go).
 ```bash
-TBD
+cd go_server
+SERVICE_PORT=3333 go run main.go
 ```
 
 Start the client (after installing Flutter).
 ```bash
-flutter run -d chrome
+cd flutter_app
+flutter run -d chrome --dart-define=SERVICE=real --dart-define=SERVICE_HOSTNAME=http://localhost:3333
 ```
 
 ## Make changes
@@ -35,5 +37,5 @@ path/to/webrpc-gen -schema=./service.ridl -target=../../ -client -out=flutter_ap
 
 To generate the server
 ```bash
-path/to/webrpc-gen -schema=./service.ridl -target=golang -server -out=go_server/server.go
+path/to/webrpc-gen -schema=./service.ridl -target=golang -server -out=go_server/proto/server.gen.go
 ```
