@@ -16,15 +16,9 @@ jobs:
 
       - name: Install webrpc-gen
         run: |
-          curl -o ./webrpc-gen -fLJO https://github.com/webrpc/webrpc/releases/download/v0.17.2/webrpc-gen.linux-amd64
+          curl -o ./webrpc-gen -fLJO https://github.com/webrpc/webrpc/releases/download/v0.18.0/webrpc-gen.linux-amd64
           chmod +x ./webrpc-gen
           echo $PWD >> $GITHUB_PATH
-
-    # TODO write examples
-    #   - name: Regenerate examples
-    #     run: cd _examples && make generate
-    #   - name: Git diff of regenerated files
-    #     run: cd _examples && make diff
 
   webrpc-tests:
     strategy:
@@ -45,10 +39,10 @@ jobs:
         run: cd tests
 
       - name: Download webrpc binaries
-        run: cd tests && ./scripts/download.sh ${{ matrix.webrpc-version }} bin/${{ matrix.webrpc-version }}
+        run: cd tests && ./scripts/download.sh ${{ matrix.webrpc-version }} .tmp/${{ matrix.webrpc-version }}
 
       - name: Export path of webrpc binaries
-        run: cd tests && echo "$PWD/bin/${{ matrix.webrpc-version }}" >> $GITHUB_PATH
+        run: cd tests && echo "$PWD/.tmp" >> $GITHUB_PATH
 
       - name: Run interoperability tests
         run: cd tests && ./scripts/test.sh
