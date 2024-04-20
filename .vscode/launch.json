@@ -34,5 +34,14 @@
                 "--dart-define=SERVICE=mock",
             ]
         },
+        {
+            "name": "Ex. backend (go_server)",
+            "request": "launch",
+            "type": "go",
+            "program": "${workspaceFolder}/_examples/flutter-go/go_server/main.go",
+            "env": {
+                "SERVICE_PORT": "3333"
+            }
+        },
     ]
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -25,7 +26,12 @@ func main() {
 	webprcHandler := proto.NewExampleServiceServer(&inventory)
 	http.Handle("/*", webprcHandler)
 
-	http.ListenAndServe(":3333", webprcHandler)
+	var port string = os.Getenv("SERVICE_PORT")
+	if port == "" {
+		panic("Missing required environment variable SERVICE_PORT")
+	}
+	fmt.Printf("go_server listening on port %s", port)
+	http.ListenAndServe(fmt.Sprintf(":%s", port), webprcHandler)
 }
 
 type ExampleServiceRPC struct {
