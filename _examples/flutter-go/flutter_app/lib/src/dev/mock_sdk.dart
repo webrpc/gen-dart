@@ -8,10 +8,19 @@ import 'package:flutter_app/generated/sdk.dart';
 
 class MockExampleService implements ExampleService {
   final Map<String, Item> _items = Map.fromEntries(_startingItems.map((e) => MapEntry(e.id, e)));
+  Duration _maxDelay = const Duration(milliseconds: 500);
+
+  void putItem(Item item) {
+    _items[item.id] = item;
+  }
+
+  void setMaxDelay(Duration duration) {
+    _maxDelay = duration;
+  }
 
   @override
   Future<void> createItem(CreateItemRequest item) {
-    return Future.delayed(_delay(), () {
+    return Future.delayed(_delay(_maxDelay), () {
       final String id = _generateId();
       _items[id] = Item(
         id: id,
@@ -26,7 +35,7 @@ class MockExampleService implements ExampleService {
 
   @override
   Future<void> deleteItem(String itemId) {
-    return Future.delayed(_delay(), () {
+    return Future.delayed(_delay(_maxDelay), () {
       if (_items.remove(itemId) == null) {
         throw WebrpcError.fromCode(ErrorId.noSuchItem.code);
       }
@@ -35,7 +44,7 @@ class MockExampleService implements ExampleService {
 
   @override
   Future<({Item item})> getItem(String itemId) {
-    return Future.delayed(_delay(), () {
+    return Future.delayed(_delay(_maxDelay), () {
       final Item? item = _items[itemId];
       if (item == null) {
         throw WebrpcError.fromCode(ErrorId.noSuchItem.code);
@@ -48,14 +57,14 @@ class MockExampleService implements ExampleService {
   @override
   Future<({List<ItemSummary> items})> getItems() {
     return Future.delayed(
-      _delay(),
+      _delay(_maxDelay),
       () => (items: _items.values.map((e) => ItemSummary(id: e.id, name: e.name)).toList()),
     );
   }
 
   @override
   Future<void> putOne(String itemId) {
-    return Future.delayed(_delay(), () {
+    return Future.delayed(_delay(_maxDelay), () {
       final Item? item = _items[itemId];
       if (item == null) {
         throw WebrpcError.fromCode(ErrorId.noSuchItem.code);
@@ -74,7 +83,7 @@ class MockExampleService implements ExampleService {
 
   @override
   Future<void> takeOne(String itemId) {
-    return Future.delayed(_delay(), () {
+    return Future.delayed(_delay(_maxDelay), () {
       final Item? item = _items[itemId];
       if (item == null) {
         throw WebrpcError.fromCode(ErrorId.noSuchItem.code);
@@ -101,8 +110,13 @@ String _generateId() {
   return base64UrlEncode(values);
 }
 
-Duration _delay() {
-  return Duration(milliseconds: _rand.nextInt(500));
+Duration _delay(Duration maxDelay) {
+  final int maxDelayMs = maxDelay.inMilliseconds;
+  if (maxDelayMs == 0) {
+    return Duration.zero;
+  } else {
+    return Duration(milliseconds: _rand.nextInt(maxDelayMs));
+  }
 }
 
 final List<Item> _startingItems = [

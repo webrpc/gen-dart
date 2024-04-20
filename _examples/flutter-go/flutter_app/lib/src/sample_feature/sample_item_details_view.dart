@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/generated/sdk.dart';
+import 'package:flutter_app/src/sample_feature/error.dart';
 import 'package:provider/provider.dart';
 
 /// Displays detailed information about a SampleItem.
@@ -24,17 +25,13 @@ class _SampleItemDetailsViewState extends State<SampleItemDetailsView> {
 
   void _onAddOne() {
     context.read<ExampleService>().putOne(widget.summary.id).onError((error, stackTrace) {
-      // Generally you'd inform the user that something went wrong and, depending
-      // on the context, report something went wrong.
-      debugPrint(_parseError(error));
+      showErrorNotification(error, context);
     }).whenComplete(_updateItem);
   }
 
   void _onTakeOne() {
     context.read<ExampleService>().takeOne(widget.summary.id).onError((error, stackTrace) {
-      // Generally you'd inform the user that something went wrong and, depending
-      // on the context, report something went wrong.
-      debugPrint(_parseError(error));
+      showErrorNotification(error, context);
     }).whenComplete(_updateItem);
   }
 
@@ -78,6 +75,7 @@ class _SampleItemDetailsViewState extends State<SampleItemDetailsView> {
               child: Text(msg),
             );
           }
+
           final Item item = snapshot.data!.item;
           return Stack(
             children: [
@@ -126,15 +124,5 @@ class _SampleItemDetailsViewState extends State<SampleItemDetailsView> {
         },
       ),
     );
-  }
-}
-
-String _parseError(Object? err) {
-  if (err is WebrpcError) {
-    return err.message;
-  } else if (err is WebrpcException) {
-    return err.message;
-  } else {
-    return err.toString();
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/generated/sdk.dart';
+import 'package:flutter_app/src/sample_feature/error.dart';
 import 'package:provider/provider.dart';
 
 import '../settings/settings_view.dart';
@@ -29,9 +30,7 @@ class _SampleItemListViewState extends State<SampleItemListView> {
 
   void _onDeleteItem(String itemId) {
     context.read<ExampleService>().deleteItem(itemId).onError((error, stackTrace) {
-      // Generally you'd inform the user that something went wrong and, depending
-      // on the context, report something went wrong.
-      debugPrint(_parseError(error));
+      showErrorNotification(error, context);
     }).whenComplete(_updateItems);
   }
 
@@ -46,9 +45,7 @@ class _SampleItemListViewState extends State<SampleItemListView> {
 
   Future<void> _onCreateItem(CreateItemRequest req) async {
     await context.read<ExampleService>().createItem(req).onError((error, stackTrace) {
-      // Generally you'd inform the user that something went wrong and, depending
-      // on the context, report something went wrong.
-      debugPrint(_parseError(error));
+      showErrorNotification(error, context);
     }).whenComplete(_updateItems);
   }
 
@@ -149,16 +146,6 @@ class _SampleItemListViewState extends State<SampleItemListView> {
         ],
       ),
     );
-  }
-}
-
-String _parseError(Object? err) {
-  if (err is WebrpcError) {
-    return err.message;
-  } else if (err is WebrpcException) {
-    return err.message;
-  } else {
-    return err.toString();
   }
 }
 

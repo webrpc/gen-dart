@@ -8,6 +8,8 @@ import 'src/settings/settings_controller.dart';
 import 'src/settings/settings_service.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   // Set up the SettingsController, which will glue user settings to multiple
   // Flutter Widgets.
   final settingsController = SettingsController(SettingsService());
@@ -17,19 +19,27 @@ void main() async {
   await settingsController.loadSettings();
 
   // Create a single instance of the service SDK and pass it to Widgets in a provider
-  // final ExampleService service = ExampleServiceImpl("http://localhost:1234");
-  // or use a mock implementation for development and testing. You would decide
-  // between the "real" and mock implementation based on configured environment
-  // variables and/or test fixtures.
-  final ExampleService service = MockExampleService();
+  late final ExampleService service;
+  const String serviceImplementation = String.fromEnvironment("SERVICE");
+  if (serviceImplementation == "real") {
+    const String hostName = String.fromEnvironment("SERVICE_HOSTNAME");
+    service = ExampleServiceImpl(hostName);
+  } else if (serviceImplementation == "mock") {
+    // or use a mock implementation for development and testing
+    service = MockExampleService();
+  }
 
   // Run the app and pass in the SettingsController. The app listens to the
   // SettingsController for changes, then passes it further down to the
   // SettingsView.
-  runApp(MultiProvider(
+  runApp(buildApp(settingsController, service));
+}
+
+Widget buildApp(SettingsController settingsController, ExampleService exampleService) {
+  return MultiProvider(
     providers: [
-      Provider<ExampleService>(create: (_) => service),
+      Provider<ExampleService>(create: (_) => exampleService),
     ],
     child: MyApp(settingsController: settingsController),
-  ));
+  );
 }
