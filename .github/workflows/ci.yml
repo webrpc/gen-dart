@@ -9,7 +9,7 @@ on:
       - "**"
 
 jobs:
-  test:
+  get-webrpc:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -21,11 +21,12 @@ jobs:
           echo $PWD >> $GITHUB_PATH
 
   webrpc-tests:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         webrpc-version: [v0.18.0]
+        dart-version: [3.1]
         
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
@@ -36,15 +37,17 @@ jobs:
           path: tests/.tmp
 
       - uses: dart-lang/setup-dart@v1
-
-      - name: Install dependencies
-        run: cd tests
+        with:
+            sdk: ${{ matrix.dart-version }}
 
       - name: Download webrpc binaries
         run: cd tests && ./scripts/download.sh ${{ matrix.webrpc-version }} .tmp/
 
       - name: Export path of webrpc binaries
         run: cd tests && echo "$PWD/.tmp" >> $GITHUB_PATH
+
+      - name: Install Dart dependencies
+        run: cd tests && dart pub get
 
       - name: Run interoperability tests
         run: cd tests && ./scripts/test.sh
