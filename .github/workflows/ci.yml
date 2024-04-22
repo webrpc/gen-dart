@@ -41,13 +41,17 @@ jobs:
             sdk: ${{ matrix.dart-version }}
 
       - name: Download webrpc binaries
-        run: cd tests && ./scripts/download.sh ${{ matrix.webrpc-version }} .tmp/
+        working-directory: ./tests
+        run: ./scripts/download.sh ${{ matrix.webrpc-version }} .tmp/
 
       - name: Export path of webrpc binaries
-        run: cd tests && echo "$PWD/.tmp" >> $GITHUB_PATH
+        working-directory: ./tests
+        run: echo "$PWD/.tmp" >> $GITHUB_PATH
 
       - name: Install Dart dependencies
-        run: cd tests && dart pub get
+        working-directory: ./tests
+        run: dart pub get
 
       - name: Run interoperability tests
-        run: cd tests && ./scripts/test.sh
+        working-directory: ./tests
+        run: ./scripts/test.sh
