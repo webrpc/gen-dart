@@ -23,7 +23,7 @@ jobs:
   webrpc-tests:
     strategy:
       matrix:
-        webrpc-version: [v0.17.2]
+        webrpc-version: [v0.18.0]
         
     runs-on: ubuntu-latest
     steps:
