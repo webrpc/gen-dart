@@ -41,7 +41,7 @@ webrpctest="$webrpc_root/webrpc-test"
 
 ./$webrpcgen -schema="schema/custom.ridl" -target=../ -client -out=lib/custom_client.dart
 
-./$webrpctest -server -port=$PORT -timeout=5s &
+./$webrpctest -server -port=$PORT -timeout=60s &
 
 # Wait until http://localhost:$PORT is available, up to 10s.
 for (( i=0; i<100; i++ )); do nc -z localhost $PORT && break || sleep 0.1; done
