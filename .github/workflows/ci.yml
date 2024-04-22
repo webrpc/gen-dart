@@ -39,7 +39,7 @@ jobs:
         run: cd tests
 
       - name: Download webrpc binaries
-        run: cd tests && ./scripts/download.sh ${{ matrix.webrpc-version }} .tmp/${{ matrix.webrpc-version }}
+        run: cd tests && ./scripts/download.sh ${{ matrix.webrpc-version }} .tmp/
 
       - name: Export path of webrpc binaries
         run: cd tests && echo "$PWD/.tmp" >> $GITHUB_PATH
