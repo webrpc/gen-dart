@@ -33,7 +33,9 @@ jobs:
         uses: actions/cache@v3
         with:
           key: webrpc-binaries
-          path: tests/bin
+          path: tests/.tmp
+
+      - uses: dart-lang/setup-dart@v1
 
       - name: Install dependencies
         run: cd tests
