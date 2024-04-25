@@ -1,0 +1,47 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Ex. frontend (main)",
+            "request": "launch",
+            "type": "dart",
+            "program": "${workspaceFolder}/_examples/flutter-go/flutter_app/lib/main.dart",
+            "args": [
+                "--dart-define=SERVICE=real",
+                "--dart-define=SERVICE_HOSTNAME=http://localhost:3333",
+                "--web-browser-flag=--disable-web-security"
+            ]
+        },
+        {
+            "name": "Ex. frontend (mocked)",
+            "request": "launch",
+            "type": "dart",
+            "program": "${workspaceFolder}/_examples/flutter-go/flutter_app/lib/main.dart",
+            "args": [
+                "--dart-define=SERVICE=mock",
+                "--web-browser-flag=--disable-web-security"
+            ]
+        },
+        {
+            "name": "Ex. frontend tests",
+            "type": "dart",
+            "request": "launch",
+            "program": "${workspaceFolder}/_examples/flutter-go/flutter_app/test/",
+            "args": [
+                "--dart-define=SERVICE=mock",
+            ]
+        },
+        {
+            "name": "Ex. backend (go_server)",
+            "request": "launch",
+            "type": "go",
+            "program": "${workspaceFolder}/_examples/flutter-go/go_server/main.go",
+            "env": {
+                "SERVICE_PORT": "3333"
+            }
+        },
+    ]
+}

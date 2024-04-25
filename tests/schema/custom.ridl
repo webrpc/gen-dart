@@ -1,0 +1,97 @@
+webrpc = v1
+
+name = flutter-go
+version = v1.0.0
+
+service CustomService
+    - CoreTypesRequired(v: CoreTypesRequired) => (v: CoreTypesRequired)
+    - CoreTypesOptional(v: CoreTypesOptional) => (v: CoreTypesOptional)
+    - Complex(v: Complex) => (v: Complex)
+    - MyEnum(v: MyEnum) => (v: MyEnum)
+    - MByte(v: byte) => (v: byte)
+    - MBool(v: bool) => (v: bool)
+    - MAny(v: any) => (v: any)
+    - MNull(v: null) => (v: null)
+    - MUint8(v: uint8) => (v: uint8)
+    - MUint16(v: uint16) => (v: uint16)
+    - MUint32(v: uint32) => (v: uint32)
+    - MUint64(v: uint64) => (v: uint64)
+    - MInt8(v: int8) => (v: int8)
+    - MInt16(v: int16) => (v: int16)
+    - MInt32(v: int32) => (v: int32)
+    - MInt64(v: int64) => (v: int64)
+    - MFloat32(v: float32) => (v: float32)
+    - MFloat64(v: float64) => (v: float64)
+    - MString(v: string) => (v: string)
+    - MTimestamp(v: timestamp) => (v: timestamp)
+    - MList(v: []int32) => (v: []int32)
+    - MMap(v: map<int32, string>) => (v: map<int32, string>)
+    - Ping()
+    - GetOne() => (v: int32)
+    - GetMulti() => (v1: int32, v2: int32)
+    - SendOne(v: int32)
+    - SendMulti(v1: int32, v2: int32)
+    - GetSchemaError(v: uint16)
+
+struct CoreTypesOptional
+    - mByte?: byte
+    - mBool?: bool
+    - mNull?: null
+    - mAny?: any
+    - mUint8?: uint8
+    - mUint16?: uint16
+    - mUint32?: uint32
+    - mUint64?: uint64
+    - mInt8?: int8
+    - mInt16?: int16
+    - mInt32?: int32
+    - mInt64?: int64
+    - mFloat32?: float32
+    - mFloat64?: float64
+    - mString?: string
+    - mTimestamp?: timestamp
+
+struct CoreTypesRequired
+    - mByte: byte
+    - mBool: bool
+    - mAny: any
+    - mNull: null
+    - mUint8: uint8
+    - mUint16: uint16
+    - mUint32: uint32
+    - mUint64: uint64
+    - mInt8: int8
+    - mInt16: int16
+    - mInt32: int32
+    - mInt64: int64
+    - mFloat32: float32
+    - mFloat64: float64
+    - mString: string
+    - mTimestamp: timestamp
+
+struct Complex 
+    - coreList: []int32
+    - recursiveList: []Complex
+    - nestedList: [][]Complex
+    - optionalList?: []int32
+    - coreMap: map<string, timestamp>
+    - recursiveMap: map<string, Complex>
+    - nestedMap: map<string, map<int32, []Complex>>
+    - optionalMap?: map<string, timestamp>
+    - myEnum: MyEnum
+    - myEnumList: []MyEnum
+    - myEnumMap: map<string, MyEnum>
+    - myEnumOptional?: MyEnum
+
+enum MyEnum: uint32
+    - A
+    - B
+    - C
+    - D
+
+error 1 SmallestCode "smallest code" HTTP 400
+error 400 BasicClientError "basic client error" HTTP 400
+error 499 CustomClientError "custom client error" HTTP 499
+error 500 BasicServerError "basic server error" HTTP 500
+error 599 CustomServerError "custom server error" HTTP 599
+error 9999 DefaultHttpCode "default HTTP code"

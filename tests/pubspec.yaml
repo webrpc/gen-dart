@@ -1,0 +1,13 @@
+name: tests
+description: Tests for the Webrpc Dart generator
+version: 0.17.2
+
+environment:
+  sdk: ^3.1.1
+
+dependencies:
+  http: ^1.1.0
+
+dev_dependencies:
+  lints: ^3.0.0
+  test: ^1.24.0

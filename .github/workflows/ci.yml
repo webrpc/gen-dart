@@ -1,0 +1,57 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - "**"
+
+jobs:
+  get-webrpc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install webrpc-gen
+        run: |
+          curl -o ./webrpc-gen -fLJO https://github.com/webrpc/webrpc/releases/download/v0.18.0/webrpc-gen.linux-amd64
+          chmod +x ./webrpc-gen
+          echo $PWD >> $GITHUB_PATH
+
+  webrpc-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        webrpc-version: [v0.18.0]
+        dart-version: [3.1]
+        
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up webrpc binary cache folder
+        uses: actions/cache@v3
+        with:
+          key: webrpc-binaries
+          path: tests/.tmp
+
+      - uses: dart-lang/setup-dart@v1
+        with:
+            sdk: ${{ matrix.dart-version }}
+
+      - name: Download webrpc binaries
+        working-directory: ./tests
+        run: ./scripts/download.sh ${{ matrix.webrpc-version }} .tmp/
+
+      - name: Export path of webrpc binaries
+        working-directory: ./tests
+        run: echo "$PWD/.tmp" >> $GITHUB_PATH
+
+      - name: Install Dart dependencies
+        working-directory: ./tests
+        run: dart pub get
+
+      - name: Run interoperability tests
+        working-directory: ./tests
+        run: ./scripts/test.sh
