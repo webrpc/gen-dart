@@ -2,6 +2,7 @@ webrpc = v1
 
 name = flutter-go
 version = v1.0.0
+basepath = /v1
 
 service CustomService
     - CoreTypesRequired(v: CoreTypesRequired) => (v: CoreTypesRequired)

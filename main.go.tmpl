@@ -76,7 +76,7 @@ const webRPCSchemaVersion = "{{.SchemaVersion}}";
 const webRPCSchemaHash = "{{.SchemaHash}}";
 
 {{- if $opts.client}}
-{{template "client" dict "Services" .Services "Opts" $opts "TypeMap" $typeMap}}
+{{template "client" dict "BasePath" .BasePath "Services" .Services "Opts" $opts "TypeMap" $typeMap}}
 {{- end}}
 
 {{- if $opts.server}}
