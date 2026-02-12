@@ -15,7 +15,7 @@
 {{$ind}}for (MapEntry e{{$depth}} in v{{$depth}}.entries) {
 {{$ind}}    final dynamic v{{add $depth 1}} = e{{$depth}}.value;
 {{/* JSON requires all object keys to be strings, so we must double decode any non-string map keys */}}
-            {{- if eq (get $typeMap (mapKeyType $type)) "String"}}
+            {{- if eq (mapKeyType $type) "string"}}
 {{$ind}}    final String k{{add $depth 1}} = e{{$depth}}.key;
             {{- else}}
 {{$ind}}    final dynamic k{{add $depth 1}} = jsonDecode(e{{$depth}}.key);
