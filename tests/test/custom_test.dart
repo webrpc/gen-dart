@@ -76,7 +76,7 @@ void main() {
     }
 
     Uri uri(String method) {
-      return Uri.parse("$baseUrl/rpc/CustomService/$method");
+      return Uri.parse("$baseUrl/v1/CustomService/$method");
     }
 
     test('core type: byte', () async {

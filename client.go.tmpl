@@ -2,13 +2,15 @@
 
 {{- $typeMap := .TypeMap -}}
 {{- $opts := .Opts -}}
+{{- $basepath := .BasePath -}}
+{{- $services := .Services -}}
 
-{{- if .Services}}
+{{- if $services }}
 
-{{- range .Services}}
+{{- range $services }}
 class {{.Name}}Impl implements {{.Name}} {
     {{.Name}}Impl(String hostname, [WebrpcHttpClient? httpClient])
-        : _baseUrl = '$hostname/rpc/{{.Name}}/',
+        : _baseUrl = '$hostname{{$basepath}}{{.Name}}/',
           _httpClient = httpClient ?? _MainWebrpcHttpClient();
 
     final String _baseUrl;
