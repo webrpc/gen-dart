@@ -16,7 +16,7 @@ jobs:
 
       - name: Install webrpc-gen
         run: |
-          curl -o ./webrpc-gen -fLJO https://github.com/webrpc/webrpc/releases/download/v0.18.0/webrpc-gen.linux-amd64
+          curl -o ./webrpc-gen -fLJO https://github.com/webrpc/webrpc/releases/download/v0.37.0/webrpc-gen.linux-amd64
           chmod +x ./webrpc-gen
           echo $PWD >> $GITHUB_PATH
 
@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        webrpc-version: [v0.32.3]
+        webrpc-version: [v0.37.0]
         dart-version: [3.1]
 
     steps:

@@ -31,6 +31,10 @@ enum {{$type.Name}} {
 }
 {{end -}}
 
+{{- if isAliasType $type }}
+typedef {{$type.Name}} = {{template "type" dict "Type" $type.Type "TypeMap" $typeMap}};
+{{end -}}
+
 {{- if isStructType $type }}
 class {{$type.Name}} implements JsonSerializable {
     {{$type.Name}}({

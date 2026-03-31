@@ -12,6 +12,9 @@ service ExampleService
     - TakeOne(itemId: string)
     - DeleteItem(itemId: string)
 
+type ItemName: string
+type Quantity: uint32
+
 enum ItemTier: uint32
     - REGULAR
     - PREMIUM
