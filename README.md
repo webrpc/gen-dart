@@ -50,6 +50,7 @@ Change any of the following values by passing `-option="Value"` CLI flag to `web
 |----------------------|----------------------------|----------------------------|
 | `-client`            | generate client code       | unset (`false`)            |
 | `-server`            | generate server code       | unset (`false`)            |
+| `-schemaHash=false`  | don't emit schema hash + version consts | enabled (`true`)           |
 
 ### Avoid using Records
 Because Dart [Records do not retain runtime information about their structure](https://github.com/dart-lang/language/issues/2826), it's impossible
